@@ -24,6 +24,30 @@ def is_header_set_to(request, header, value):
             answer = True
     return answer
 
+class WMSStreamMuncher(object):
+    def __init__(self, http_stream, outputfile):
+        self.stream = http_stream
+        self.munch()
+        self.fd = open(outputfile, "wb")
+
+    def callbackwhatever(self, a):
+        self.gotData(a)
+        self.munch()
+    
+    def gotData(self, data):
+        logging.debug("Got %d bytes of data!" % len(data))
+        self.fd.write(data)
+        self.fd.flush()
+        
+    def munch(self):
+        a = self.stream.read()
+        if isinstance(a, defer.Deferred):
+            a.addCallback(self.callbackwhatever)
+        else:
+            self.gotData(a)
+            self.munch()
+        
+
 # class Root(resource.Resource):
 #     def render(self, request):
 #         logging.debug("Got request on root")
@@ -38,7 +62,7 @@ class WMSPushStreamResource(resource.PostableResource):
         Overloads the herp derp version in web2's resource that fucks up on anything that has
         a non-typical MIME type.
 
-        We don't want to use the argument-parsing from formencoded feature.
+        We don't want to use the argument-parsing from formencoded feature included in PostableResource.
         """
         d = defer.succeed(None)
         d.addCallback(lambda res: self.render(request))
@@ -56,6 +80,9 @@ class WMSPushStreamResource(resource.PostableResource):
             return answer
         elif is_header_set_to(request, "Content-Type", "application/x-wms-pushstart"):
             logging.debug("A WMS push stream is beginning!")
+            self.streammuncher = WMSStreamMuncher(request.stream, "/tmp/out.wmv")
+            return None
+            
 
         return http.Response(422, {}, "")
             
