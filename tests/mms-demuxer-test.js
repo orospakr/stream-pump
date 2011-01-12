@@ -34,6 +34,14 @@ module.exports = testCase({
     },
 
     testInvalidHeaderMagicShouldErrorOut: function(cb) {
-	cb.done();
+	var simplePacket = new Buffer([0x19, 0x44, 0x05]);
+	var stream = new MockStream();
+	var testD = new mms_demuxer.MMSDemuxer(stream, function(error) {
+	    cb.done();
+	}.bind(this));
+	testD.whenPacketReceived(function(packet) {
+	    cb.error();
+	}.bind(this));
+	stream.injectData(simplePacket);
     }
 });
