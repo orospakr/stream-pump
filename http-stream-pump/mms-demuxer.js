@@ -1,56 +1,106 @@
 var sys = require('sys');
 var strtok = require('strtok');
 
-var MMSPacket = function() {
-    Buffer.call(this, 4096 * 17); // 69632 (65K plus 4096 of breathing room)
+var assert = require('assert');
 
-    this.downloaded = 0;
+var MMSPacket = function(ready_cb, error_cb) {
+    /* This is going to involve copies. I don't really care for that, to be honest.
+     * Maybe I should keep references to slices instead.
+     */
 
-    this.payloadSize = function() {
-    };
+    // the number of fields so far parsed in the header since the PacketID field
+    this.fields_parsed = 0;
 
-    this.remainingNeededBytesForHeader = function() {
-    };
+    // the packet length size given in 
+    this.packet_length = 0;
 
-    this.remainingNeededBytes = function() {
-    };
+    // the (optional) reason field that some packets have
+    this.reason = 0;
 
-    this.isHeaderDownloaded = function() {
-    };
+    // packet has been entirely loaded
+    this.finished = false;
 
-    this.isCompletelyLoaded = function() {
+    // the (optional) Buffer containing the payload
+    this.payload = undefined;
+
+    /**
+     * Submit the next expected token produced by strtok.
+     * This function has tokens delegated to it by the MMSDemuxer.
+     */
+    this.consumeToken = function(token) {
+	if(this.fields_parsed === 0) {
+	    // length field
+	    this.packet_length = token;
+	    if(this.has_reason) {
+		this.fields_parsed = 1;
+		// expecting reason field next
+		return strtok.UINT32_LE;
+	    } else {
+		this.fields_parsed = 2;
+		// skipping it, going directly to payload
+		return new strtok.BufferType(this.packet_length);
+	    }
+	} else if(this.fieldsParsed === 1) {
+	    // reason field
+	    this.reason = token;
+	    return new strtok.BufferType(this.packet_length);
+	} else if(this.fields_parsed === 2) {
+	    // payload field
+	    /* even though not all packet types include payload fields,
+	       it's safe to try to load them with the necessarily specified
+	       length of zero. */
+	    this.payload = token;
+	    ready_cb(token);
+	    this.validate();
+	    this.finished = true;
+	    return strtok.DONE;
+	} else {
+	    assert.ok(false);
+	}
     };
 };
 
-sys.inherits(MMSPacket, Buffer);
+var DataPacket = function(ready_cb) {
+    this.has_reason = false;
+    this.name = "Data";
 
-var testPacket = new MMSPacket();
+    MMSPacket.call(this, ready_cb);
+
+    this.validate = function() {
+	
+    };
+};
+sys.inherits(DataPacket, MMSPacket);
 
 // MMS Framing Demuxer
 var MMSDemuxer = function(stream, errorHandler) {
     this.packet_cbs = [];
+
+    // parsing state.
     this.fieldsParsed = 0;
-    this.currentPacket = undefined;
-    
-    this.newPacket = function() {
-	this.currentPacket = new MMSPacket();
-    },
+    this.current_packet = undefined;
 
     // submit a callback to be fired once an MMS packet has been completely received
     this.whenPacketReceived = function(cb) {
 	this.packet_cbs.push(cb);
     };
 
-    // Submit a Buffer containing some packet data.
-    this.submitData = function(field) {
+    /**
+     * Strtok handler function; receives and asks for tokens.
+     * Responsible for detecting the magic number, B-bit (immediate followup),
+     * and Packet Type fields.
+     * Once it has those, it delegates to the appropriate MMSPacket object
+     */
+    this.consumeToken = function(field) {
 	// do we have the first four bytes of the packet header yet?
 	// if so, we know how much data we can expect.
 	// if(this.currentPacket.downloaded < 4) {
 	//     // okay, we want to make sure that we've loaded
 	// }
 
-	if(field === undefined) {
+	if(this.fieldsParsed === 0) {
 	    // strtok always begins the sequence with undefined
+	    assert.ok(field == undefined);
 	    this.fieldsParsed = 1;
 	    return strtok.UINT8;
 	} else if(this.fieldsParsed === 1) {
@@ -63,30 +113,40 @@ var MMSDemuxer = function(stream, errorHandler) {
 	    this.fieldsParsed = 2;
 	    return strtok.UINT8;
 	} else if(this.fieldsParsed === 2) {
-	    if(field == 0x44) {
-		// $D type!
-		this.fieldsParsed = 3;
-		return strtok.UINT16_LE;
-	    } else {
+	    this.fieldsParsed = 3;
+	    var Tipe = undefined;
+	    switch(field) {
+	    case 0x44: // $D!
+		Tipe = DataPacket;
+		break;
+	    default:
 		console.log("I don't support MMS packet type #" + field + " yet!");
 		errorHandler();
 		return strtok.DONE;
 	    }
+	    this.current_packet = new Tipe(function() {
+		console.log("Packet of " + Tipe.name + " arrived!");
+		this.packet_cbs.forEach(function(cb) {
+		    cb(this.current_packet);
+		}.bind(this));
+	    }.bind(this),
+					   function() {
+					       console.log("Problem reconstituting packet!");
+					       errorHandler();
+					       // error'd :(
+					   });
+	    return strtok.UINT16_LE;
+	    
 	} else if(this.fieldsParsed === 3) {
-	    this.fieldsParsed = 4;
-	    return new strtok.BufferType(field);
-	} else if(this.fieldsParsed === 4) {
-	    this.fieldsParsed = 5;
-	    this.packet_cbs.forEach(function(cb) {
-	        cb(field);
-	    });
-	    return strtok.DONE;
+	    // now delegating to MMSPacket!
+	    return this.current_packet.consumeToken(field);
+	} else {
+	    assert.fail();
 	}
-	
     };
-
+	
     // start the pipeline!
-    strtok.parse(stream, this.submitData.bind(this));
+    strtok.parse(stream, this.consumeToken.bind(this));
 };
 
 exports.MMSDemuxer = MMSDemuxer;

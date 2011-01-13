@@ -17,14 +17,14 @@ var MockStream = function() {
 sys.inherits(MockStream, events.EventEmitter);
 
 module.exports = testCase({
-    testSubmitFullHeaderAndData: function(callback) {
+    SimpleHeaderAndData: function(callback) {
 	// MMS "data" packet, "B" bit not set, 5 bytes payload
 	var simplePacket = new Buffer([0x24, 0x44, 0x05, 0x00, 0x00, 0x01, 0x02, 0x03, 0x04]);
 	var stream = new MockStream();
 	var testD = new mms_demuxer.MMSDemuxer(stream);
 
 	testD.whenPacketReceived(function(packet) {
-	    callback.equal(packet.length, 5);
+	    callback.equal(packet.payload.length, 5);
 	    callback.done();
 	}.bind(this));
 	stream.injectData(simplePacket);
@@ -33,15 +33,37 @@ module.exports = testCase({
 	// because I never call done()...
     },
 
-    testInvalidHeaderMagicShouldErrorOut: function(cb) {
-	var simplePacket = new Buffer([0x19, 0x44, 0x05]);
-	var stream = new MockStream();
-	var testD = new mms_demuxer.MMSDemuxer(stream, function(error) {
-	    cb.done();
-	}.bind(this));
-	testD.whenPacketReceived(function(packet) {
-	    cb.error();
-	}.bind(this));
-	stream.injectData(simplePacket);
+    InvalidMagicShouldErrorOut: function(cb) {
+    	var simplePacket = new Buffer([0x19, 0x44, 0x05]);
+    	var stream = new MockStream();
+    	var testD = new mms_demuxer.MMSDemuxer(stream, function(error) {
+    	    cb.done();
+    	}.bind(this));
+    	testD.whenPacketReceived(function(packet) {
+    	    cb.error();
+    	}.bind(this));
+    	stream.injectData(simplePacket);
+    },
+
+    PacketTypes: {
+    	StreamChangeNotification: function(cb) {
+    	    cb.done();
+    	},
+
+    	// Data: function(cb) {
+    	// },
+
+    	// EOS: function(cb) {
+    	// },
+
+    	// Header: function(cb) {
+    	// },
+
+    	// PacketPair: function(cb) {
+	    
+    	// },
+
+    	// TestData: function(cb) {
+    	// }
     }
 });
