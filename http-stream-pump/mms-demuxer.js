@@ -107,6 +107,10 @@ var EndOfStreamPacket = function(ready_cb, error_cb) {
 
     MMSPacket.call(this, ready_cb, error_cb);
 
+    this.reasonOkay = function() {
+	return (this.reason == 0);
+    };
+
     this.validate = function(err_cb) {
 	if(this.packet_length != 4) {
 	    err_cb("Invalid MMS End of Stream Packet: length must always be 4.");
@@ -163,9 +167,12 @@ var MMSDemuxer = function(stream, errorHandler) {
 	    case 0x44: // $D
 		Tipe = DataPacket;
 		break;
-	    case 0x45: // $C
+	    case 0x43: // $C
 		Tipe = StreamChangePacket;
-		break
+		break;
+	    case 0x45: // $E
+		Tipe = EndOfStreamPacket;
+		break;
 	    default:
 		console.log("I don't support MMS packet type #" + field + " yet!");
 		errorHandler();

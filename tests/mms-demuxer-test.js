@@ -59,14 +59,26 @@ module.exports = testCase({
 		cb.equal(packet.reason, 0x00);
 		cb.done();
 	    }.bind(this));
-	    stream.injectData(new Buffer([0x24, 0x45, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00]));
+	    stream.injectData(new Buffer([0x24, 0x43, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00]));
     	},
 
     	// Data: function(cb) {
     	// },
 
-    	// EOS: function(cb) {
-    	// },
+    	EndOfStream: {
+	    Finished: function(cb) {
+		var stream = new MockStream();
+		var testD = new mms_demuxer.MMSDemuxer(stream, function(error) {
+		    cb.ok(false);
+		}.bind(this));
+		testD.whenPacketReceived(function(packet) {
+		    cb.equal(packet.packet_length, 4);
+		    cb.equal(packet.reasonOkay(), true);
+		    cb.done();
+		}.bind(this));
+		stream.injectData(new Buffer([0x24, 0x45, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00]));
+	    }
+    	},
 
     	// Header: function(cb) {
     	// },
