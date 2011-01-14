@@ -11,6 +11,8 @@ var fs = require('fs');
 
 var strtok = require('strtok');
 
+var mms_demuxer = require('./http-stream-pump/mms-demuxer');
+
 // var wingas = require('./http_stream_pump/');
 
 // http://blog.vjeux.com/2010/javascript/javascript-binary-reader.html
@@ -27,7 +29,7 @@ var reqHandler = function(req, response) {
 	    console.log("WMS Push Setup request received!");
 	    return;
 	} else if(req.headers["content-type"] === "application/x-wms-pushstart") {
-	    console.log("Starting stream!!");
+	    console.log("Starting stream!");
 	    // var fd = fs.createWriteStream("/tmp/10dectest.mms", {'flags': 'w'});
 	    // if(fd === undefined) {
 	    // 	console.log("WTFFFF");
@@ -37,30 +39,22 @@ var reqHandler = function(req, response) {
 	    // 	console.log("Got " + data.length + " bytes!");
 	    // });
 
-	    strtok.parse(req, function(value) {
-		// console.log("GOT MY CALLBACK: " + value);
-		// response.writeHead(422, {"Content-Type": "text/plain"});
-		// response.end("Hum.  That doesn't make too much sense to me...");
-		
-		return strtok.UINT8;
+	    var demuxer = new mms_demuxer.MMSDemuxer(req, function() {
+		response.writeHead(422, {"Content-Type": "text/plain"});
+		// TODO: would be very nice to push my shiny protocol errors up to here.
+		response.end("Sorry, but your stream did not make any sense!");
 	    }.bind(this));
-	    console.log(util.inspect(req.headers));
+
+	    // console.log(util.inspect(req.headers));
 	    return;
 	} else {
-	    // response.writeHead(422, {"Content-Type": "text/plain"});
-	    // response.end("Hum.  That doesn't make too much sense to me...");
-	    // console.log("Unexpected fetch of /video with content type of " + req.headers["content-type"]);
+	    response.writeHead(422, {"Content-Type": "text/plain"});
+	    response.end("Hum.  That doesn't make too much sense to me...");
+	    console.log("Unexpected fetch of /video with content type of " + req.headers["content-type"]);
 
 	    // there is some question as to what will happen here in terms of
 	    // HTTP protocol control; I kind of have to assume that the stream is
 	    // not aware of chunked encoding, and all that entails.
-	    strtok.parse(req, function(value) {
-		console.log("GOT MY CALLBACK");
-		// response.writeHead(422, {"Content-Type": "text/plain"});
-		// response.end("Hum.  That doesn't make too much sense to me...");
-
-		return strtok.UINT8;
-	    }.bind(this));
 	    console.log(util.inspect(req.headers));
 	    return;
 	}

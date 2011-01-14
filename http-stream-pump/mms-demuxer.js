@@ -73,7 +73,11 @@ var MMSPacket = function(ready_cb, error_cb) {
 	       length of zero. */
 	    this.payload = token;
 	    this.packetReady();
-	    return strtok.DONE;
+	    // HACK -- we have to return the type of the next packet
+	    // for strtok here.  a little encapsulation-breaking.
+	    // TODO if the continuation bit isn't set here,
+	    // then maybe the correct thing to do is return DONE.
+	    return strtok.UINT8;
 	} else {
 	    // yikes! Never supposed to get here...
 	    console.log("Whoa, for some reason I have counted an inappropriate number of parsed fields: " + this.fields_parsed);
@@ -150,8 +154,7 @@ var MMSDemuxer = function(stream, errorHandler) {
     this.packet_cbs = [];
 
     // parsing state.
-    this.fieldsParsed = 0;
-    this.current_packet = undefined;
+    this.fields_parsed = 0;
 
     // submit a callback to be fired once an MMS packet has been completely received
     this.whenPacketReceived = function(cb) {
@@ -171,22 +174,22 @@ var MMSDemuxer = function(stream, errorHandler) {
 	//     // okay, we want to make sure that we've loaded
 	// }
 
-	if(this.fieldsParsed === 0) {
+	if(this.fields_parsed === 0) {
 	    // strtok always begins the sequence with undefined
 	    assert.ok(field == undefined);
-	    this.fieldsParsed = 1;
+	    this.fields_parsed = 1;
 	    return strtok.UINT8;
-	} else if(this.fieldsParsed === 1) {
+	} else if(this.fields_parsed === 1) {
 	    if(field !== 0x24) {
 		// TODO check for the immediate-continuation field, "B"
 		console.log("Not a valid MMS packet!");
 		errorHandler();
 		return strtok.DONE;
 	    }
-	    this.fieldsParsed = 2;
+	    this.fields_parsed = 2;
 	    return strtok.UINT8;
-	} else if(this.fieldsParsed === 2) {
-	    this.fieldsParsed = 3;
+	} else if(this.fields_parsed === 2) {
+	    this.fields_parsed = 3;
 	    var Tipe = undefined;
 	    switch(field) {
 	    case 0x44: // $D
@@ -211,20 +214,26 @@ var MMSDemuxer = function(stream, errorHandler) {
 	    }
 	    this.current_packet = new Tipe(function() {
 		// success'd! :D
-		console.log("Packet of " + Tipe.name + " arrived!");
+		console.log("Packet of " + this.current_packet.name + " arrived!");
 		this.packet_cbs.forEach(function(cb) {
 		    cb(this.current_packet);
 		}.bind(this));
+		console.log("going for another run");
+		// we skip the first iteration where it provides the type
+		// for the first toten; we have to return that in the right
+		// callback chain, so I have to do it in the MMSPacket side
+		// of things.
+		this.fields_parsed = 1;
+		this.current_packet = undefined;
 	    }.bind(this),
 	    function() {
 		// error'd :(
 		console.log("Problem reconstituting packet!");
 		errorHandler();
-
 	    }.bind(this));
 	    return strtok.UINT16_LE;
 
-	} else if(this.fieldsParsed === 3) {
+	} else if(this.fields_parsed === 3) {
 	    // now delegating to MMSPacket!
 	    return this.current_packet.consumeToken(field);
 	} else {
