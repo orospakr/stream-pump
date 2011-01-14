@@ -218,7 +218,6 @@ var MMSDemuxer = function(stream, errorHandler) {
 		this.packet_cbs.forEach(function(cb) {
 		    cb(this.current_packet);
 		}.bind(this));
-		console.log("going for another run");
 		// we skip the first iteration where it provides the type
 		// for the first toten; we have to return that in the right
 		// callback chain, so I have to do it in the MMSPacket side

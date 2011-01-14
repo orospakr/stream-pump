@@ -49,9 +49,7 @@ module.exports = testCase({
 		cb.equal(packet.payload.length, 5);
 		cb.equal(packet.name, "Data");
 		received = 1;
-		console.log("FIRST ONE");
 	    } else if(received === 1) {
-		console.log("SECOND ONE");
 		cb.equal(packet.payload, undefined);
 		cb.equal(packet.name, "End of Stream");
 		cb.done();
