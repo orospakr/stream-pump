@@ -17,22 +17,22 @@ var MockStream = function() {
 sys.inherits(MockStream, events.EventEmitter);
 
 module.exports = testCase({
-    SimpleHeaderAndData: function(callback) {
-	// MMS "data" packet, "B" bit not set, 5 bytes payload
-	var simplePacket = new Buffer([0x24, 0x44, 0x05, 0x00, 0x00, 0x01, 0x02, 0x03, 0x04]);
-	var stream = new MockStream();
-	var testD = new mms_demuxer.MMSDemuxer(stream, function(error) {
-	    callback.ok(false);
-	}.bind(this));
+    SimpleHeaderAndData: function(cb) {
+    	// MMS "data" packet, "B" bit not set, 5 bytes payload
+    	var simplePacket = new Buffer([0x24, 0x44, 0x05, 0x00, 0x00, 0x01, 0x02, 0x03, 0x04]);
+    	var stream = new MockStream();
+    	var testD = new mms_demuxer.MMSDemuxer(stream, function(error) {
+    	    cb.ok(false);
+    	}.bind(this));
 
-	testD.whenPacketReceived(function(packet) {
-	    callback.equal(packet.payload.length, 5);
-	    callback.done();
-	}.bind(this));
-	stream.injectData(simplePacket);
-	// TODO can I make the test explicitly fail if that callback never
-	// happens?  instead it causes the rest of the test suite to not run
-	// because I never call done()...
+    	testD.whenPacketReceived(function(packet) {
+    	    cb.equal(packet.payload.length, 5);
+    	    cb.done();
+    	}.bind(this));
+    	stream.injectData(simplePacket);
+    	// TODO can I make the test explicitly fail if that callback never
+    	// happens?  instead it causes the rest of the test suite to not run
+    	// because I never call done()...
     },
 
     InvalidMagicShouldErrorOut: function(cb) {
@@ -49,7 +49,17 @@ module.exports = testCase({
 
     PacketTypes: {
     	StreamChangeNotification: function(cb) {
-    	    cb.done();
+	    var stream = new MockStream();
+	    var testD = new mms_demuxer.MMSDemuxer(stream, function(error) {
+		cb.ok(false);
+	    }.bind(this));
+	    
+	    testD.whenPacketReceived(function(packet) {
+		cb.equal(packet.packet_length, 4);
+		cb.equal(packet.reason, 0x00);
+		cb.done();
+	    }.bind(this));
+	    stream.injectData(new Buffer([0x24, 0x45, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00]));
     	},
 
     	// Data: function(cb) {

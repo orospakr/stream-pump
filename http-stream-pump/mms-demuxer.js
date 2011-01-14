@@ -23,6 +23,17 @@ var MMSPacket = function(ready_cb, error_cb) {
     // the (optional) Buffer containing the payload
     this.payload = undefined;
 
+    /** Internal routine; packet is done, send it out to consumers.
+      */
+    this.packetReady = function() {
+	ready_cb();
+	this.validate(function(error_explanation) {
+	    console.log("Aww, this packet is invalid, because: " + error_explanation);
+	    error_cb();
+	}.bind(this));
+	this.finished = true;
+    };
+
     /**
      * Submit the next expected token produced by strtok.
      * This function has tokens delegated to it by the MMSDemuxer.
@@ -40,24 +51,24 @@ var MMSPacket = function(ready_cb, error_cb) {
 		// skipping it, going directly to payload
 		return new strtok.BufferType(this.packet_length);
 	    }
-	} else if(this.fieldsParsed === 1) {
+	} else if(this.fields_parsed === 1) {
 	    // reason field
 	    this.reason = token;
-	    return new strtok.BufferType(this.packet_length);
+	    this.fields_parsed = 2;
+	    // for PacketPair type, ask for ensuing buffer of appropriate length, otherwise:
+	    this.packetReady();
+	    return strtok.DONE;
 	} else if(this.fields_parsed === 2) {
 	    // payload field
 	    /* even though not all packet types include payload fields,
 	       it's safe to try to load them with the necessarily specified
 	       length of zero. */
 	    this.payload = token;
-	    ready_cb(token);
-	    this.validate(function(error_explanation) {
-		console.log("Aww, this packet is invalid, because: " + error_explanation);
-		error_cb();
-	    }.bind(this));
-	    this.finished = true;
+	    this.packetReady();
 	    return strtok.DONE;
 	} else {
+	    // yikes! Never supposed to get here...
+	    console.log("Whoa, for some reason I have counted an inappropriate number of parsed fields: " + this.fields_parsed);
 	    assert.ok(false);
 	}
     };
@@ -83,12 +94,27 @@ var StreamChangePacket = function(ready_cb, error_cb) {
 
     this.validate = function(err_cb) {
 	if(this.packet_length != 4) {
-	    err_cb("Invalid MMS Stream Packet: length must always be 4.");
+	    err_cb("Invalid MMS Stream Change Packet: length must always be 4.");
 	    return;
 	}
     };
 };
 sys.inherits(StreamChangePacket, MMSPacket);
+
+var EndOfStreamPacket = function(ready_cb, error_cb) {
+    this.has_reason = true;
+    this.name = "End of Stream";
+
+    MMSPacket.call(this, ready_cb, error_cb);
+
+    this.validate = function(err_cb) {
+	if(this.packet_length != 4) {
+	    err_cb("Invalid MMS End of Stream Packet: length must always be 4.");
+	    return;
+	}
+    };
+};
+sys.inherits(EndOfStreamPacket, MMSPacket);
 
 // MMS Framing Demuxer
 var MMSDemuxer = function(stream, errorHandler) {
@@ -134,9 +160,12 @@ var MMSDemuxer = function(stream, errorHandler) {
 	    this.fieldsParsed = 3;
 	    var Tipe = undefined;
 	    switch(field) {
-	    case 0x44: // $D!
+	    case 0x44: // $D
 		Tipe = DataPacket;
 		break;
+	    case 0x45: // $C
+		Tipe = StreamChangePacket;
+		break
 	    default:
 		console.log("I don't support MMS packet type #" + field + " yet!");
 		errorHandler();
