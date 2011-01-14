@@ -21,7 +21,9 @@ module.exports = testCase({
 	// MMS "data" packet, "B" bit not set, 5 bytes payload
 	var simplePacket = new Buffer([0x24, 0x44, 0x05, 0x00, 0x00, 0x01, 0x02, 0x03, 0x04]);
 	var stream = new MockStream();
-	var testD = new mms_demuxer.MMSDemuxer(stream);
+	var testD = new mms_demuxer.MMSDemuxer(stream, function(error) {
+	    callback.ok(false);
+	}.bind(this));
 
 	testD.whenPacketReceived(function(packet) {
 	    callback.equal(packet.payload.length, 5);

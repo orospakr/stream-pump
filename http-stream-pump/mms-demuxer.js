@@ -11,7 +11,7 @@ var MMSPacket = function(ready_cb, error_cb) {
     // the number of fields so far parsed in the header since the PacketID field
     this.fields_parsed = 0;
 
-    // the packet length size given in 
+    // the packet length size given in
     this.packet_length = 0;
 
     // the (optional) reason field that some packets have
@@ -51,7 +51,10 @@ var MMSPacket = function(ready_cb, error_cb) {
 	       length of zero. */
 	    this.payload = token;
 	    ready_cb(token);
-	    this.validate();
+	    this.validate(function(error_explanation) {
+		console.log("Aww, this packet is invalid, because: " + error_explanation);
+		error_cb();
+	    }.bind(this));
 	    this.finished = true;
 	    return strtok.DONE;
 	} else {
@@ -60,17 +63,32 @@ var MMSPacket = function(ready_cb, error_cb) {
     };
 };
 
-var DataPacket = function(ready_cb) {
+var DataPacket = function(ready_cb, error_cb) {
     this.has_reason = false;
     this.name = "Data";
 
-    MMSPacket.call(this, ready_cb);
+    MMSPacket.call(this, ready_cb, error_cb);
 
-    this.validate = function() {
+    this.validate = function(err_cb) {
 	
     };
 };
 sys.inherits(DataPacket, MMSPacket);
+
+var StreamChangePacket = function(ready_cb, error_cb) {
+    this.has_reason = true;
+    this.name = "Stream Change";
+
+    MMSPacket.call(this, ready_cb, error_cb);
+
+    this.validate = function(err_cb) {
+	if(this.packet_length != 4) {
+	    err_cb("Invalid MMS Stream Packet: length must always be 4.");
+	    return;
+	}
+    };
+};
+sys.inherits(StreamChangePacket, MMSPacket);
 
 // MMS Framing Demuxer
 var MMSDemuxer = function(stream, errorHandler) {
@@ -125,18 +143,20 @@ var MMSDemuxer = function(stream, errorHandler) {
 		return strtok.DONE;
 	    }
 	    this.current_packet = new Tipe(function() {
+		// success'd! :D
 		console.log("Packet of " + Tipe.name + " arrived!");
 		this.packet_cbs.forEach(function(cb) {
 		    cb(this.current_packet);
 		}.bind(this));
 	    }.bind(this),
-					   function() {
-					       console.log("Problem reconstituting packet!");
-					       errorHandler();
-					       // error'd :(
-					   });
+	    function() {
+		// error'd :(
+		console.log("Problem reconstituting packet!");
+		errorHandler();
+
+	    }.bind(this));
 	    return strtok.UINT16_LE;
-	    
+
 	} else if(this.fieldsParsed === 3) {
 	    // now delegating to MMSPacket!
 	    return this.current_packet.consumeToken(field);
@@ -144,7 +164,7 @@ var MMSDemuxer = function(stream, errorHandler) {
 	    assert.fail();
 	}
     };
-	
+
     // start the pipeline!
     strtok.parse(stream, this.consumeToken.bind(this));
 };
