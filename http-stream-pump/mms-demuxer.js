@@ -35,6 +35,14 @@ var MMSPacket = function(ready_cb, error_cb) {
     };
 
     /**
+      * Check that this packet has sane values.
+      * Virtual.  Override this in the specific Packet type impelementations.
+      */
+    this.validate = function() {
+	// override me
+    };
+
+    /**
      * Submit the next expected token produced by strtok.
      * This function has tokens delegated to it by the MMSDemuxer.
      */
@@ -120,6 +128,23 @@ var EndOfStreamPacket = function(ready_cb, error_cb) {
 };
 sys.inherits(EndOfStreamPacket, MMSPacket);
 
+var HeaderPacket = function(ready_cb, error_cb) {
+    this.has_reason = false;
+    this.name = "Header";
+
+    MMSPacket.call(this, ready_cb, error_cb);
+};
+sys.inherits(HeaderPacket, MMSPacket);
+
+var MetadataPacket = function(ready_cb, error_cb) {
+    this.has_reason = false;
+    this.name = "Metadata";
+
+    MMSPacket.call(this, ready_cb, error_cb);
+};
+sys.inherits(MetadataPacket, MMSPacket);
+    
+
 // MMS Framing Demuxer
 var MMSDemuxer = function(stream, errorHandler) {
     this.packet_cbs = [];
@@ -172,6 +197,12 @@ var MMSDemuxer = function(stream, errorHandler) {
 		break;
 	    case 0x45: // $E
 		Tipe = EndOfStreamPacket;
+		break;
+	    case 0x48:
+		Tipe = HeaderPacket;
+		break;
+	    case 0x4D:
+		Tipe = MetadataPacket;
 		break;
 	    default:
 		console.log("I don't support MMS packet type #" + field + " yet!");

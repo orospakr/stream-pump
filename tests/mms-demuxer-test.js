@@ -80,8 +80,31 @@ module.exports = testCase({
 	    }
     	},
 
-    	// Header: function(cb) {
-    	// },
+    	Header: function(cb) {
+	    var stream = new MockStream();
+	    var testD = new mms_demuxer.MMSDemuxer(stream, function(error) {
+		cb.ok(false);
+	    }.bind(this));
+	    testD.whenPacketReceived(function(packet) {
+		cb.equal(packet.packet_length, 5);
+		cb.equal(packet.payload.length, 5);
+		cb.done();
+	    }.bind(this));
+	    stream.injectData(new Buffer([0x24, 0x48, 0x05, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05]));
+    	},
+
+	Metadata: function(cb) {
+	    var stream = new MockStream();
+	    var testD = new mms_demuxer.MMSDemuxer(stream, function(error) {
+		cb.ok(false);
+	    }.bind(this));
+	    testD.whenPacketReceived(function(packet) {
+		cb.equal(packet.packet_length, 5);
+		cb.equal(packet.payload.length, 5);
+		cb.done();
+	    }.bind(this));
+	    stream.injectData(new Buffer([0x24, 0x4D, 0x05, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05]));
+	},
 
     	// PacketPair: function(cb) {
 	    
