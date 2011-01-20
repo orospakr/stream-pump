@@ -42,6 +42,26 @@ var MMSPacket = function(ready_cb, error_cb) {
 	// override me
     };
 
+    this.inspect = function() {
+	return "MMS: " + this.name + ": " + this.inspectHeader() + "; " + this.inspectPayload();
+    };
+
+    this.inspectPayload = function() {
+	if(this.payload) {
+	    return "payload: " + this.payload.length + " bytes";
+	} else {
+	    return "";
+	}
+    };
+
+    this.inspectHeader = function() {
+	if(this.has_reason) {
+	    return "reason: " + this.reason;
+	} else {
+	    return "";
+	}
+    };
+
     /**
      * Submit the next expected token produced by strtok.
      * This function has tokens delegated to it by the MMSDemuxer.
@@ -214,7 +234,7 @@ var MMSDemuxer = function(stream, errorHandler) {
 	    }
 	    this.current_packet = new Tipe(function() {
 		// success'd! :D
-		console.log("Packet of " + this.current_packet.name + " arrived!");
+		console.log("Packet: " + this.current_packet.inspect());
 		this.packet_cbs.forEach(function(cb) {
 		    cb(this.current_packet);
 		}.bind(this));
