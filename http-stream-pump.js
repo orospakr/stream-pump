@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-/* First attempt at node.js version of HTTP StreamPump, since Twisted turned out to suck. */
 
 var http = require('http');
 
@@ -11,55 +10,23 @@ var fs = require('fs');
 
 var strtok = require('strtok');
 
-var mms_demuxer = require('./http-stream-pump/mms-demuxer');
 
-// var wingas = require('./http_stream_pump/');
+var mms_handler = require('./http-stream-pump/mms-handler');
 
-// http://blog.vjeux.com/2010/javascript/javascript-binary-reader.html
+var stream_handler = new mms_handler.MMSHandler();
 
 var reqHandler = function(req, response) {
     var pathname = url.parse(req.url).pathname;
     if(pathname.match(/^\/video/i)) {
-	if(req.headers["content-type"] === "application/x-wms-pushsetup") {
-	    response.writeHead(204, {"Server": "Cougar/9.6.7600.16564",
-				     "Pragma": "no-cache, timeout=60000",
-				     "Set-Cookie": "push-id=42424242",
-				     "Supported": "com.microsoft.wm.srvppair, com.microsoft.wm.sswitch, com.microsoft.wm.predstrm, com.microsoft.wm.fastcache, com.microsoft.wm.startupprofile"});
-	    response.end();
-	    console.log("WMS Push Setup request received!");
-	    return;
-	} else if(req.headers["content-type"] === "application/x-wms-pushstart") {
-	    console.log("Starting stream!");
-	    // var fd = fs.createWriteStream("/tmp/10dectest.mms", {'flags': 'w'});
-	    // if(fd === undefined) {
-	    // 	console.log("WTFFFF");
-	    // }
-	    // req.on('data', function(data) {
-	    // 	fd.write(data);
-	    // 	console.log("Got " + data.length + " bytes!");
-	    // });
-
-	    var demuxer = new mms_demuxer.MMSDemuxer(req, function() {
-		response.writeHead(422, {"Content-Type": "text/plain"});
-		// TODO: would be very nice to push my shiny protocol errors up to here.
-		response.end("Sorry, but your stream did not make any sense!");
-	    }.bind(this));
-
-	    // console.log(util.inspect(req.headers));
-	    return;
-	} else {
-	    response.writeHead(422, {"Content-Type": "text/plain"});
-	    response.end("Hum.  That doesn't make too much sense to me...");
-	    console.log("Unexpected fetch of /video with content type of " + req.headers["content-type"]);
-
-	    // there is some question as to what will happen here in terms of
-	    // HTTP protocol control; I kind of have to assume that the stream is
-	    // not aware of chunked encoding, and all that entails.
-	    console.log(util.inspect(req.headers));
-	    return;
-	}
+	stream_handler.consumeRequest(req, response);
     } else {
 	response.writeHead(404, {"Content-Type": "text/html"});
+	// console.log("Do they support chunked?!");
+	// if(response.chunkedEncoding) {
+	//     console.log("... yes!");
+	// } else {
+	//     console.log("... no :(");
+	// }
 	response.end("Sorry, nothing here!");
 	console.log("404'd: Attempt to fetch " + pathname);
 	

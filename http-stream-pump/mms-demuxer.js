@@ -5,14 +5,14 @@ var assert = require('assert');
 
 var MMSPacket = function(ready_cb, error_cb) {
     /* This is going to involve copies. I don't really care for that, to be honest.
-     * Maybe I should keep references to slices instead.
+     * Maybe I should keep references to slices instead, somehow?
      */
 
     // the number of fields so far parsed in the header since the PacketID field
     this.fields_parsed = 0;
 
     // the packet length size given in
-    this.packet_length = 0;
+    this.data_length = 0;
 
     // the (optional) reason field that some packets have
     this.reason = 0;
@@ -69,7 +69,7 @@ var MMSPacket = function(ready_cb, error_cb) {
     this.consumeToken = function(token) {
 	if(this.fields_parsed === 0) {
 	    // length field
-	    this.packet_length = token;
+	    this.data_length = token;
 	    if(this.has_reason) {
 		this.fields_parsed = 1;
 		// expecting reason field next
@@ -77,7 +77,7 @@ var MMSPacket = function(ready_cb, error_cb) {
 	    } else {
 		this.fields_parsed = 2;
 		// skipping it, going directly to payload
-		return new strtok.BufferType(this.packet_length);
+		return new strtok.BufferType(this.data_length);
 	    }
 	} else if(this.fields_parsed === 1) {
 	    // reason field
@@ -95,8 +95,6 @@ var MMSPacket = function(ready_cb, error_cb) {
 	    this.packetReady();
 	    // HACK -- we have to return the type of the next packet
 	    // for strtok here.  a little encapsulation-breaking.
-	    // TODO if the continuation bit isn't set here,
-	    // then maybe the correct thing to do is return DONE.
 	    return strtok.UINT8;
 	} else {
 	    // yikes! Never supposed to get here...
@@ -104,13 +102,32 @@ var MMSPacket = function(ready_cb, error_cb) {
 	    assert.ok(false);
 	}
     };
+
+    this.repack = function() {
+	var buf = new Buffer(4 + this.data_length);
+	strtok.UINT8.put(buf, 0, 0x24, false); // TODO: B field
+	strtok.UINT8.put(buf, 1, 0x48, false); // hardcoded for Header type
+	strtok.UINT16_LE.put(buf, 2, this.data_length);
+	console.log("DERP");
+	if(this.has_reason) {
+	    console.log("DARP");
+	    strtok.UINT32_LE.put(buf, 4, this.reason);
+	    this.payload.copy(buf, 8, 0);
+	} else {
+	    this.payload.copy(buf, 4, 0);
+	}
+	return buf;
+    };
 };
+exports.MMSPacket = MMSPacket;
 
 var DataPacket = function(ready_cb, error_cb) {
     this.has_reason = false;
     this.name = "Data";
 
     MMSPacket.call(this, ready_cb, error_cb);
+
+    console.log("WHAT: " + this.name);
 
     this.validate = function(err_cb) {
 	
@@ -125,7 +142,7 @@ var StreamChangePacket = function(ready_cb, error_cb) {
     MMSPacket.call(this, ready_cb, error_cb);
 
     this.validate = function(err_cb) {
-	if(this.packet_length != 4) {
+	if(this.data_length != 4) {
 	    err_cb("Invalid MMS Stream Change Packet: length must always be 4.");
 	    return;
 	}
@@ -144,7 +161,7 @@ var EndOfStreamPacket = function(ready_cb, error_cb) {
     };
 
     this.validate = function(err_cb) {
-	if(this.packet_length != 4) {
+	if(this.data_length != 4) {
 	    err_cb("Invalid MMS End of Stream Packet: length must always be 4.");
 	    return;
 	}
@@ -153,12 +170,14 @@ var EndOfStreamPacket = function(ready_cb, error_cb) {
 sys.inherits(EndOfStreamPacket, MMSPacket);
 
 var HeaderPacket = function(ready_cb, error_cb) {
-    this.has_reason = false;
-    this.name = "Header";
 
     MMSPacket.call(this, ready_cb, error_cb);
+
+    this.has_reason = false;
+    this.name = "Header";
 };
 sys.inherits(HeaderPacket, MMSPacket);
+exports.HeaderPacket = HeaderPacket;
 
 var MetadataPacket = function(ready_cb, error_cb) {
     this.has_reason = false;
@@ -170,7 +189,7 @@ sys.inherits(MetadataPacket, MMSPacket);
     
 
 // MMS Framing Demuxer
-var MMSDemuxer = function(stream, errorHandler) {
+var MMSDemuxer = function(stream, packetHandler, errorHandler) {
     this.packet_cbs = [];
 
     // parsing state.
@@ -180,6 +199,8 @@ var MMSDemuxer = function(stream, errorHandler) {
     this.whenPacketReceived = function(cb) {
 	this.packet_cbs.push(cb);
     };
+
+    this.whenPacketReceived(packetHandler);
 
     /**
      * Strtok handler function; receives and asks for tokens.
@@ -203,7 +224,7 @@ var MMSDemuxer = function(stream, errorHandler) {
 	    if(field !== 0x24) {
 		// TODO check for the immediate-continuation field, "B"
 		console.log("Not a valid MMS packet!");
-		errorHandler();
+		errorHandler("Not a valid MMS packet, has wrong magic field!");
 		return strtok.DONE;
 	    }
 	    this.fields_parsed = 2;
@@ -211,6 +232,7 @@ var MMSDemuxer = function(stream, errorHandler) {
 	} else if(this.fields_parsed === 2) {
 	    this.fields_parsed = 3;
 	    var Tipe = undefined;
+	    // TODO DRY violation with repack(); Packet types themselves should know their own IDs
 	    switch(field) {
 	    case 0x44: // $D
 		Tipe = DataPacket;
@@ -229,7 +251,7 @@ var MMSDemuxer = function(stream, errorHandler) {
 		break;
 	    default:
 		console.log("I don't support MMS packet type #" + field + " yet!");
-		errorHandler();
+		errorHandler("I don't support MMS packet type #" + field + " yet!");
 		return strtok.DONE;
 	    }
 	    this.current_packet = new Tipe(function() {
@@ -248,7 +270,7 @@ var MMSDemuxer = function(stream, errorHandler) {
 	    function() {
 		// error'd :(
 		console.log("Problem reconstituting packet!");
-		errorHandler();
+		errorHandler("Problem reconstituting packet!");
 	    }.bind(this));
 	    return strtok.UINT16_LE;
 
