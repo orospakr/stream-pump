@@ -57,8 +57,8 @@ exports.MMSHandler = function() {
 		
 		console.log("Client arrived before stream is up.  Disappointing them.");
 	    } else {
-		response.writeHead(200, [["Content-Type", "application/vnd.ms.wms-hdr.asfv1"], ["Content-Length", this.stream.header.length], ["Pragma", "no-cache"], ["Pragma", "client-id=23232323"], ["Pragma", "features=\"broadcast,playlist\""]]);
-		response.end(this.stream.header);
+		response.writeHead(200, [["Content-Type", "application/vnd.ms.wms-hdr.asfv1"], ["Content-Length", this.stream.header.data_length], ["Pragma", "no-cache"], ["Pragma", "client-id=23232323"], ["Pragma", "features=\"broadcast,playlist\""]]);
+		response.end(this.stream.header.repack());
 	    }
 
 //	    console.log(util.inspect(req.headers));

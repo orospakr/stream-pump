@@ -14,12 +14,12 @@ module.exports.MMSStream = function(strm, error_cb) {
 
     this.demuxer = new mms_demuxer.MMSDemuxer(strm, function(packet) {
 	// packet
-	if(packet.name === "header") {
+	if(packet.name === "Header") {
 	    // TODO don't allow header to be changed twice
 	    console.log("Header has been received!");
 	    this.header = packet;
 	}
-    }, function() {
+    }.bind(this), function() {
 	// error :(
 	error_cb();
     }.bind(this));
