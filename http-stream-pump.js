@@ -11,7 +11,7 @@ var fs = require('fs');
 var strtok = require('strtok');
 
 
-var mms_handler = require('./http-stream-pump/mms-handler');
+var mms_handler = require('./lib/mms-handler');
 
 var stream_handler = new mms_handler.MMSHandler();
 

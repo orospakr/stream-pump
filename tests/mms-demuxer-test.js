@@ -1,6 +1,6 @@
 var testCase = require('nodeunit').testCase;
 
-var mms_demuxer = require('../http-stream-pump/mms-demuxer.js');
+var mms_demuxer = require('../lib/mms-demuxer.js');
 
 var events = require('events');
 

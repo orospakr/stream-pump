@@ -1,6 +1,6 @@
 var testCase = require('nodeunit').testCase;
 
-var mms_stream = require('../http-stream-pump/mms-stream.js');
+var mms_stream = require('../lib/mms-stream.js');
 
 module.exports = testCase({
     // setUp: function(cb) {
