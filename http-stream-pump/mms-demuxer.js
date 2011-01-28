@@ -108,9 +108,7 @@ var MMSPacket = function(ready_cb, error_cb) {
 	strtok.UINT8.put(buf, 0, 0x24, false); // TODO: B field
 	strtok.UINT8.put(buf, 1, 0x48, false); // hardcoded for Header type
 	strtok.UINT16_LE.put(buf, 2, this.data_length);
-	console.log("DERP");
 	if(this.has_reason) {
-	    console.log("DARP");
 	    strtok.UINT32_LE.put(buf, 4, this.reason);
 	    this.payload.copy(buf, 8, 0);
 	} else {

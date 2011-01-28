@@ -23,5 +23,9 @@ module.exports.MMSStream = function(strm, error_cb) {
 	// error :(
 	error_cb();
     }.bind(this));
+
+    this.isReady = function() {
+	return(this.header !== undefined);
+    };
 };
 sys.inherits(module.exports.MMSStream, stream.Stream);
