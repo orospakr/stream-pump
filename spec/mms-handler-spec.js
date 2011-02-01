@@ -63,7 +63,6 @@ describe('MMS Handler', function() {
 		constructor_called = true;
 
 		this.isHeaderAvailable = function() {
-		    console.log("WELL: " + header_is_available);
 		    return header_is_available;
 		}
 
@@ -84,7 +83,6 @@ describe('MMS Handler', function() {
 	});
 
 	it("should send a new client an error if stream is not ready", function() {
-	    console.log("CLIENT IS OFF");
 	    var req = {
 		    headers: {}
 	    };
@@ -110,7 +108,6 @@ describe('MMS Handler', function() {
 	    });
 
 	    it("should send clients the header", function() {
-		console.log("CLIENT IS ON");
 		var req = {
 		    headers: {}
 		};
