@@ -1,8 +1,8 @@
-var testCase = require('nodeunit').testCase;
+
 
 var mms_stream = require('../lib/mms-stream.js');
 
-module.exports = testCase({
+//module.exports = testCase({
     // setUp: function(cb) {
     // 	this.stream = new mms_stream.MMSStream();
     // },
@@ -66,4 +66,4 @@ module.exports = testCase({
     // 	    // if the source has disconnected/sent EOS, close it send EOS to all the clients and go back into our starting state
     // 	}
     // },
-});
+//});

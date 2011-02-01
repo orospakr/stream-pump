@@ -1,36 +1,39 @@
-var testCase = require('nodeunit').testCase;
-
 var util = require('util');
+
+var spec_helper = require("./spec_helper.js");
 
 var mms_handler = require('../lib/mms-handler.js');
 
 var mms_stream = require('../lib/mms-stream.js');
 
-module.exports = testCase({
-    setUp: function(cb) {
-	this.handler = new mms_handler.MMSHandler();
-	cb.done();
-    },
 
-    pushSetup: function(cb) {
+describe('MMS Handler', function() {
+    var handler = undefined;
+    beforeEach(function() {
+	handler = new mms_handler.MMSHandler();
+    });
+  
+    it("should respond to a push setup request", function() {
 	var req = {
 	    headers: {"content-type": "application/x-wms-pushsetup"},
 	};
+	var received_head = false, received_end = false;
+	
 	var response = {
-	    received_head: false,
 	    writeHead: function(code, headers) {
-		cb.equal(204, code);
-		this.received_head = true;
+		expect(code).toEqual(204);
+		received_head = true;
 	    },
 	    end: function() {
-		cb.ok(this.received_head);
-		cb.done();
+		expect(received_head).toBeTruthy();
+		received_end = true;
 	    }
 	};
-	this.handler.consumeRequest(req, response);
-    },
+	handler.consumeRequest(req, response);
+	expect(received_end).toBeTruthy();
+    });
 
-    pushStart: function(cb) {
+    it("should begin streaming in response to an opened pushstart request", function() {
 	var req = {
 	    headers: {"content-type": "application/x-wms-pushstart"},
 	};
@@ -41,16 +44,36 @@ module.exports = testCase({
 	var setStreamMock = function(mock) {
 	    this.stream = mock;
 	}.bind(this);
+
+	var constructor_called = false;
 	
 	mms_stream.MMSStream = function(breq, error_cb) {
-	    cb.equals(req, breq);
+	    expect(breq).toBe(req);
 	    setStreamMock(this);
-	    cb.done();
+	    constructor_called = true;
 	};
 	
-	this.handler.consumeRequest(req, response);
+	handler.consumeRequest(req, response);
+
+	expect(constructor_called).toBeTruthy();
 
 	mms_stream.MMSStream = orig_stream;
+    });
+});
+
+
+
+
+derp = {
+    setUp: function(cb) {
+    },
+
+    pushSetup: function(cb) {
+
+    },
+
+    pushStart: function(cb) {
+	
     },
 
     clientArrivesAfterPushStart: function(cb) {
@@ -72,4 +95,4 @@ module.exports = testCase({
 	};
 	this.handler.consumeRequest(req, response);
     },
-});
+};
