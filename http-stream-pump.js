@@ -17,6 +17,9 @@ var stream_handler = new mms_handler.MMSHandler();
 
 var reqHandler = function(req, response) {
     var pathname = url.parse(req.url).pathname;
+
+    console.log(req.method + " " + pathname + " (from: " + req.socket.remoteAddress + "): " + util.inspect(req.headers));
+
     if(pathname.match(/^\/video/i)) {
 	stream_handler.consumeRequest(req, response);
     } else {
@@ -35,6 +38,8 @@ var reqHandler = function(req, response) {
 
     // console.log(util.inspect(response));
 };
+
+console.log("Starting up HTTP Stream Pump!");
 
 var serverv4 = http.createServer(reqHandler);
 // var serverv6 = http.createServer(reqHandler);

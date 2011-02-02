@@ -102,7 +102,7 @@ describe('MMS Handler', function() {
 	    expect(got_end).toBeTruthy();
 	});
 
-	describe("and when the header packet has arrived", function() {
+	describe("and when the header packet has arrived and stream is ready", function() {
 	    beforeEach(function() {
 		header_is_available = true;
 	    });
@@ -114,12 +114,17 @@ describe('MMS Handler', function() {
 		var got_head = false;
 		var got_end = false;
 		var found_content_length_header = false;
+		var found_content_type_header = false;
 		var response = {
 		    writeHead: function(code, headers) {
 			headers.forEach(function(pair) {
 			    if(pair[0] === "Content-Length") {
 				found_content_length_header = true;
 				expect(pair[1]).toEqual("42");
+			    }
+			    if(pair[0] === "Content-Type") {
+				found_content_type_header = true;
+				expect(pair[1]).toEqual("application/vnd.ms.wms-hdr.asfv1");
 			    }
 			});
 			expect(code).toEqual(200);
@@ -134,7 +139,14 @@ describe('MMS Handler', function() {
 		handler.consumeRequest(req, response);
 		expect(got_end).toBeTruthy();
 		expect(found_content_length_header).toBeTruthy();
-	    });    
+		expect(found_content_type_header).toBeTruthy();
+	    });
+
+	    it("should attach clients asking to xPlayStrm=1 to the Stream", function() {
+		var req = {
+		    headers: {}
+		};
+	    });
 	});
     });
 });
