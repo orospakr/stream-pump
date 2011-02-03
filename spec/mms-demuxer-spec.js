@@ -169,5 +169,22 @@ describe('MMS Demuxer', function() {
 	    stream.injectData(fixtures.header_packet);
 	    expect(packet_received).toBeTruthy();
 	});
+
+	it("should do bit-exact demux/unpack and repack of another Header packet", function() {
+	    var stream = new MockStream();
+	    var packet_received = false;
+	    expect(fixtures.header_packet2).toBeDefined();
+	    expect(fixtures.header_packet2.length).toEqual(5465);
+	    var demux = new mms_demuxer.MMSDemuxer(stream, function(packet) {
+		expect(packet_received).toBeFalsy();
+		expect(packet.name).toEqual("Header");
+		expect(packet.repack()).toMatchBuffer(fixtures.header_packet2);
+		packet_received = true;
+	    }.bind(this), function(error) {
+		expect().toNotGetHere();
+	    }.bind(this));
+	    stream.injectData(fixtures.header_packet2);
+	    expect(packet_received).toBeTruthy();
+	});
     });
 });
