@@ -3,6 +3,8 @@ var mms_demuxer = require('../lib/mms-demuxer.js');
 
 var spec_helper = require('./spec_helper.js');
 
+var fixtures = require('./mms-demuxer-fixtures');
+
 var events = require('events');
 
 var sys = require('sys');
@@ -147,6 +149,25 @@ describe('MMS Demuxer', function() {
 	    var result = h.repack();
 	    expect(result).toBeDefined();
 	    expect(result).toMatchBuffer(expected);
+	});
+    });
+
+    describe("(integration testing)", function() {
+	it("should do bit-exact demux/unpack and repack of Header packet", function() {
+	    var stream = new MockStream();
+	    var packet_received = false;
+	    expect(fixtures.header_packet).toBeDefined();
+	    expect(fixtures.header_packet.length).toEqual(5499);
+	    var demux = new mms_demuxer.MMSDemuxer(stream, function(packet) {
+		expect(packet_received).toBeFalsy();
+		expect(packet.name).toEqual("Header");
+		expect(packet.repack()).toMatchBuffer(fixtures.header_packet);
+		packet_received = true;
+	    }.bind(this), function(error) {
+		expect().toNotGetHere();
+	    }.bind(this));
+	    stream.injectData(fixtures.header_packet);
+	    expect(packet_received).toBeTruthy();
 	});
     });
 });
