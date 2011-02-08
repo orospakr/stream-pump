@@ -1,4 +1,16 @@
 var util = require('util');
+var sys = require('sys');
+var events = require('events');
+
+var MockStream = function() {
+    events.EventEmitter.call(this);
+
+    // Call with a Buffer of data you want to submit.
+    this.injectData = function(data) {
+	this.emit("data", data);
+    };
+};
+sys.inherits(MockStream, events.EventEmitter);
 
 var bufferDump = function(buf) {
     var result = [];
@@ -40,3 +52,4 @@ var configureSpec = function() {
 };
 
 module.exports.configureSpec = configureSpec;
+module.exports.MockStream = MockStream;

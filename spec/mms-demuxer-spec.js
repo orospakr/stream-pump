@@ -5,20 +5,8 @@ var spec_helper = require('./spec_helper.js');
 
 var fixtures = require('./mms-demuxer-fixtures');
 
-var events = require('events');
-
 var sys = require('sys');
 var util = require('util');
-
-var MockStream = function() {
-    events.EventEmitter.call(this);
-
-    // Call with a Buffer of data you want to submit.
-    this.injectData = function(data) {
-	this.emit("data", data);
-    };
-};
-sys.inherits(MockStream, events.EventEmitter);
 
 describe('MMS Demuxer', function() {
     beforeEach(function() {
@@ -28,7 +16,7 @@ describe('MMS Demuxer', function() {
     it('should demux a stream of multiple packets', function() {
 	// Two MMS packets in a row; make sure we can parse multiple packets.
 	var simplePacket = new Buffer([0x24, 0x44, 0x05, 0x00, 0x00, 0x01, 0x02, 0x03, 0x04, 0x24, 0x45, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00]);
-	var stream = new MockStream();
+	var stream = new spec_helper.MockStream();
 	var received = 0;
     	var testD = new mms_demuxer.MMSDemuxer(stream, function(packet) {
 	    if(received === 0) {
@@ -50,7 +38,7 @@ describe('MMS Demuxer', function() {
 
     it('should error out on a packet without the correct magic number', function() {
 	var simplePacket = new Buffer([0x19, 0x44, 0x05]);
-    	var stream = new MockStream();
+    	var stream = new spec_helper.MockStream();
 	var got_error = false;
     	var testD = new mms_demuxer.MMSDemuxer(stream, function(packet) {
 	    expect().toNotGetHere();
@@ -65,7 +53,7 @@ describe('MMS Demuxer', function() {
 	it("should parse a Data packet", function() {
 	    // MMS "data" packet, "B" bit not set, 5 bytes payload
     	    var simplePacket = new Buffer([0x24, 0x44, 0x05, 0x00, 0x00, 0x01, 0x02, 0x03, 0x04]);
-    	    var stream = new MockStream();
+    	    var stream = new spec_helper.MockStream();
 	    var gotPacket = false;
     	    var testD = new mms_demuxer.MMSDemuxer(stream, function(packet) {
     		expect(packet.payload.length).toEqual(5);
@@ -83,7 +71,7 @@ describe('MMS Demuxer', function() {
 	});
 
 	it("should demux a stream change notification packet", function() {
-	    var stream = new MockStream();
+	    var stream = new spec_helper.MockStream();
 	    var got_packet = false;
     	    var testD = new mms_demuxer.MMSDemuxer(stream, function(packet) {
     		expect(packet.data_length).toEqual(4);
@@ -98,7 +86,7 @@ describe('MMS Demuxer', function() {
 	});
 
 	it("should parse an end of stream packet", function() {
-	    var stream = new MockStream();
+	    var stream = new spec_helper.MockStream();
 	    var got_packet = false;
     	    var testD = new mms_demuxer.MMSDemuxer(stream, function(packet) {
     		expect(packet.data_length).toEqual(4);
@@ -112,7 +100,7 @@ describe('MMS Demuxer', function() {
 	});
 
 	it("should parse a header packet", function() {
-	    var stream = new MockStream();
+	    var stream = new spec_helper.MockStream();
 	    var got_packet = false;
     	    var testD = new mms_demuxer.MMSDemuxer(stream, function(packet) {
     		expect(packet.data_length).toEqual(5);
@@ -126,7 +114,7 @@ describe('MMS Demuxer', function() {
 	});
 
 	it("should parse a metadata packet", function() {
-	    var stream = new MockStream();
+	    var stream = new spec_helper.MockStream();
 	    var got_packet = false;
     	    var testD = new mms_demuxer.MMSDemuxer(stream, function(packet) {
     		expect(packet.data_length).toEqual(5);
@@ -154,7 +142,7 @@ describe('MMS Demuxer', function() {
 
     describe("(integration testing)", function() {
 	it("should do bit-exact demux/unpack and repack of Header packet", function() {
-	    var stream = new MockStream();
+	    var stream = new spec_helper.MockStream();
 	    var packet_received = false;
 	    expect(fixtures.header_packet).toBeDefined();
 	    expect(fixtures.header_packet.length).toEqual(5499);
@@ -171,7 +159,7 @@ describe('MMS Demuxer', function() {
 	});
 
 	it("should do bit-exact demux/unpack and repack of another Header packet", function() {
-	    var stream = new MockStream();
+	    var stream = new spec_helper.MockStream();
 	    var packet_received = false;
 	    expect(fixtures.header_packet2).toBeDefined();
 	    expect(fixtures.header_packet2.length).toEqual(5465);
