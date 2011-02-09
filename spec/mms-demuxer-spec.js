@@ -138,6 +138,16 @@ describe('MMS Demuxer', function() {
 	    expect(result).toBeDefined();
 	    expect(result).toMatchBuffer(expected);
 	});
+
+	it("should repack a header packet with the undocumented redundant goofy-header in front of the data", function() {
+	    var h = new mms_demuxer.HeaderPacket(function() {}, function() {});
+	    var expected = new Buffer([0x24, 0x48, 0x0d, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0c, 0x0d, 0x00,  0x01, 0x02, 0x03, 0x04, 0x05]);
+	    h.payload = new Buffer([1,2,3,4,5]);
+	    h.data_length = 5;
+	    var result = h.repackWithGoofyHeader();
+	    expect(result).toBeDefined();
+	    expect(result).toMatchBuffer(expected);
+	});
     });
 
     describe("(integration testing)", function() {
