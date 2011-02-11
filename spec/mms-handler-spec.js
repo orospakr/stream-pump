@@ -6,24 +6,6 @@ var mms_handler = require('../lib/mms-handler.js');
 var mms_stream = require('../lib/mms-stream.js');
 var mms_client_session = require('../lib/mms-client-session.js');
 
-describe("MMS Handler's Pragma request parser", function() {
-    it("should retrieve values when Pragma field exists", function() {
-	var req = {
-	    headers: {"Pragma": "woot=5000,somethingelse,myfield"}
-	}
-	expect(mms_handler.getPragmaFields(req)["myfield"]).toBeTruthy();
-	expect(mms_handler.getPragmaFields(req)["myfieldx"]).toBeFalsy();
-	expect(mms_handler.getPragmaFields(req)["woot"]).toEqual("5000");
-    });
-
-    it("should should return an empty hash when Pragma field is missing", function() {
-	var req = {
-	    headers: {"Pragmasafdsafdsaf": "woot=5000,somethingelse,myfield"}
-	}
-	expect(mms_handler.getPragmaFields(req)).toEqual({});
-    });
-});
-
 describe('MMS Handler', function() {
     var handler = undefined;
     beforeEach(function() {
@@ -149,47 +131,6 @@ describe('MMS Handler', function() {
 		expect(got_consume_request).toBeTruthy();
 		mms_client_session.MMSClientSession = orig_mms_client_session;
 	    });
-
-	    // it("should send clients the header", function() {
-	    // 	var req = {
-	    // 	    headers: {}
-	    // 	};
-	    // 	var got_head = false;
-	    // 	var got_end = false;
-	    // 	var found_content_length_header = false;
-	    // 	var found_content_type_header = false;
-	    // 	var response = {
-	    // 	    writeHead: function(code, headers) {
-	    // 		headers.forEach(function(pair) {
-	    // 		    if(pair[0] === "Content-Length") {
-	    // 			found_content_length_header = true;
-	    // 			expect(pair[1]).toEqual("42");
-	    // 		    }
-	    // 		    if(pair[0] === "Content-Type") {
-	    // 			found_content_type_header = true;
-	    // 			expect(pair[1]).toEqual("application/vnd.ms.wms-hdr.asfv1");
-	    // 		    }
-	    // 		});
-	    // 		expect(code).toEqual(200);
-	    // 		got_head = true;
-	    // 	    },
-	    // 	    end: function(data) {
-	    // 		expect(data).toEqual("blorp");
-	    // 		expect(got_head).toBeTruthy();
-	    // 		got_end = true;
-	    // 	    }
-	    // 	};
-	    // 	handler.consumeRequest(req, response);
-	    // 	expect(got_end).toBeTruthy();
-	    // 	expect(found_content_length_header).toBeTruthy();
-	    // 	expect(found_content_type_header).toBeTruthy();
-	    // });
-
-	    // it("should attach clients asking to xPlayStrm=1 to the Stream", function() {
-	    // 	var req = {
-	    // 	    headers: {}
-	    // 	};
-	    // });
 	});
     });
 });
