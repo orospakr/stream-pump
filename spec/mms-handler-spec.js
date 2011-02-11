@@ -4,7 +4,25 @@ var spec_helper = require("./spec_helper.js");
 
 var mms_handler = require('../lib/mms-handler.js');
 var mms_stream = require('../lib/mms-stream.js');
+var mms_client_session = require('../lib/mms-client-session.js');
 
+describe("MMS Handler's Pragma request parser", function() {
+    it("should retrieve values when Pragma field exists", function() {
+	var req = {
+	    headers: {"Pragma": "woot=5000,somethingelse,myfield"}
+	}
+	expect(mms_handler.getPragmaFields(req)["myfield"]).toBeTruthy();
+	expect(mms_handler.getPragmaFields(req)["myfieldx"]).toBeFalsy();
+	expect(mms_handler.getPragmaFields(req)["woot"]).toEqual("5000");
+    });
+
+    it("should should return an empty hash when Pragma field is missing", function() {
+	var req = {
+	    headers: {"Pragmasafdsafdsaf": "woot=5000,somethingelse,myfield"}
+	}
+	expect(mms_handler.getPragmaFields(req)).toEqual({});
+    });
+});
 
 describe('MMS Handler', function() {
     var handler = undefined;
@@ -105,6 +123,31 @@ describe('MMS Handler', function() {
 	describe("and when the header packet has arrived and stream is ready", function() {
 	    beforeEach(function() {
 		header_is_available = true;
+	    });
+
+	    it("should create a new session for an incoming client", function() {
+		var req = {
+	     	    headers: {}
+	     	};
+		var response = {};
+		var orig_mms_client_session = mms_client_session.MMSClientSession;
+		var got_mms_client_constructor = false;
+		var got_consume_request = false;
+		mms_client_session.MMSClientSession = function(strm, verifier_routine) {
+		    expect(strm).toBe(stream);
+		    got_mms_client_constructor = true;
+		    // TODO unit test the verifier routine here... awkward, because I'd have to do
+		    // this whole thing over again
+		    this.consumeRequest = function(rq, resp) {
+			expect(rq).toBe(req);
+			expect(resp).toBe(response);
+			got_consume_request = true;
+		    };
+		};
+		handler.consumeRequest(req, response);
+		expect(got_mms_client_constructor).toBeTruthy();
+		expect(got_consume_request).toBeTruthy();
+		mms_client_session.MMSClientSession = orig_mms_client_session;
 	    });
 
 	    // it("should send clients the header", function() {
