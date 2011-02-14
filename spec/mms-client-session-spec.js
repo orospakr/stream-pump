@@ -55,99 +55,41 @@ describe("An MMS Client Session", function() {
 	    it("successfully", function() {});
 	    
 
-	    describe("and then consumes the first pipeline request", function() {
+	    describe("and then is asked to start playing the stream", function() {
 		beforeEach(function() {
 		    var req = {
-			headers: {"Pragma": "pipeline-request=1"}
+			headers: {"Pragma": "xPlayStrm=1"}
 		    };
-		    var got_head = false;
-		    var got_end = false;
+		    var stream_data_cb = undefined;
+		    stream.onDataPacket = function(cb) {
+			stream_data_cb = cb;
+		    };
+		    var step = 0; // 0: nowhere, 1: got HTTP headers, 2: got ASF header, 3: got data packet
+		    var header_packet = {};
 		    var response = {
 			writeHead: function(code, headers) {
 			    expect(headers["Content-Length"]).toBeUndefined();
-			    expect(headers["Content-Type"]).toBeUndefined();
+			    expect(headers["Content-Type"]).toEqual("application/x-mms-framed");
 			    expect(hsp_util.getPragmaFields({"headers": headers})["client-id"]).toEqual("2147483647");
 	    		    expect(code).toEqual(200);
-	    		    got_head = true;
+	    		    step = 1;
 			},
-			end: function(data) {
-	    		    expect(data).toMatchBuffer(new Buffer([0x24, 0x54, 0x00, 0x00])); // TODO encapsulation violation.  I really should mock out the TestDataPacket
-	    		    expect(got_head).toBeTruthy();
-	    		    got_end = true;
-			}
+			write: function(data) {
+			    if(step === 1) {
+				expect(data).toEqual("I AM HEADER");
+				step = 2;
+			    } else if(step === 2) {
+				expect(data).toEqual("dorp");
+				step = 3;
+			    }
+			},
 		    };
 		    session.consumeRequest(req, response);
-		    expect(got_end).toBeTruthy();
-		    
+		    stream_data_cb({}, "dorp");
+		    expect(step).toEqual(3);
 		});
 
 		it("successfully", function() {});
-
-		describe("and then consumes the second pipeline request", function() {
-		    beforeEach(function() {
-			var req = {
-			    headers: {"Pragma": "pipeline-request=1"}
-			};
-			var got_head = false;
-			var got_end = false;
-			var response = {
-			    writeHead: function(code, headers) {
-				expect(headers["Content-Length"]).toEqual("0");
-				expect(headers["Content-Type"]).toBeUndefined();
-				expect(hsp_util.getPragmaFields({"headers": headers})["client-id"]).toEqual("2147483647");
-				expect(hsp_util.getPragmaFields({"headers": headers})["pipeline-result"]).toEqual("1");
-	    			expect(code).toEqual(200);
-	    			got_head = true;
-			    },
-			    end: function(data) {
-	    			expect(data).toBeUndefined();
-	    			expect(got_head).toBeTruthy();
-	    			got_end = true;
-			    }
-			};
-			session.consumeRequest(req, response);
-			expect(got_end).toBeTruthy();
-		    });
-
-		    it("successfully", function() {});
-
-		    describe("and then is asked to start playing the stream", function() {
-			beforeEach(function() {
-			    var req = {
-				headers: {"Pragma": "xPlayStrm=1"}
-			    };
-			    var stream_data_cb = undefined;
-			    stream.onDataPacket = function(cb) {
-				stream_data_cb = cb;
-			    };
-			    var step = 0; // 0: nowhere, 1: got HTTP headers, 2: got ASF header, 3: got data packet
-			    var header_packet = {};
-			    var response = {
-				writeHead: function(code, headers) {
-				    expect(headers["Content-Length"]).toBeUndefined();
-				    expect(headers["Content-Type"]).toEqual("application/x-mms-framed");
-				    expect(hsp_util.getPragmaFields({"headers": headers})["client-id"]).toEqual("2147483647");
-	    			    expect(code).toEqual(200);
-	    			    step = 1;
-				},
-				write: function(data) {
-				    if(step === 1) {
-					expect(data).toEqual("I AM HEADER");
-					step = 2;
-				    } else if(step === 2) {
-					expect(data).toEqual("dorp");
-					step = 3;
-				    }
-				},
-			    };
-			    session.consumeRequest(req, response);
-			    stream_data_cb({}, "dorp");
-			    expect(step).toEqual(3);
-			});
-
-			it("successfully", function() {});
-		    });
-		});
 	    });
 	});
     });
