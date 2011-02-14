@@ -1,5 +1,9 @@
-/* this one came from WMP9 pulling from EE4 */
+// HTTP Stream Pump - HTTP live video stream reflector written in Node.js
+// Copyright (C) 2010-2011  Government of Canada
+// Written by Andrew Clunis <aclunis@credil.org>
+// See COPYING for license terms.
 
+/* this one came from WMP9 pulling from EE4 */
 exports.header_packet = new Buffer([0x24, 0x48, 0x77, 0x15, 0x00, 0x00, 0x00, 0x00, 
 0x00, 0x0c, 0x77, 0x15, 0x30, 0x26, 0xb2, 0x75, 
 0x8e, 0x66, 0xcf, 0x11, 0xa6, 0xd9, 0x00, 0xaa, 
