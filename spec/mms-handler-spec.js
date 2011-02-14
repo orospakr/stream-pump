@@ -7,8 +7,8 @@ var mms_stream = require('../lib/mms-stream.js');
 var mms_client_session = require('../lib/mms-client-session.js');
 
 describe('MMS Handler', function() {
-    var handler = undefined;
     beforeEach(function() {
+	spec_helper.configureSpec.bind(this)();
 	handler = new mms_handler.MMSHandler();
     });
   
