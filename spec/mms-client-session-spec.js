@@ -15,7 +15,7 @@ describe("An MMS Client Session", function() {
     describe("when new", function() {
 	describe("consumes a Describe request", function() {
 	    beforeEach(function() {
-		var stream = { header: {
+		stream = { header: {
 		    repackWithGoofyHeader: function() {
 			return "I AM HEADER";
 		    }
@@ -110,6 +110,43 @@ describe("An MMS Client Session", function() {
 		    });
 
 		    it("successfully", function() {});
+
+		    describe("and then is asked to start playing the stream", function() {
+			beforeEach(function() {
+			    var req = {
+				headers: {"Pragma": "xPlayStrm=1"}
+			    };
+			    var stream_data_cb = undefined;
+			    stream.onDataPacket = function(cb) {
+				stream_data_cb = cb;
+			    };
+			    var step = 0; // 0: nowhere, 1: got HTTP headers, 2: got ASF header, 3: got data packet
+			    var header_packet = {};
+			    var response = {
+				writeHead: function(code, headers) {
+				    expect(headers["Content-Length"]).toBeUndefined();
+				    expect(headers["Content-Type"]).toEqual("application/x-mms-framed");
+				    expect(hsp_util.getPragmaFields({"headers": headers})["client-id"]).toEqual("2147483647");
+	    			    expect(code).toEqual(200);
+	    			    step = 1;
+				},
+				write: function(data) {
+				    if(step === 1) {
+					expect(data).toEqual("I AM HEADER");
+					step = 2;
+				    } else if(step === 2) {
+					expect(data).toEqual("dorp");
+					step = 3;
+				    }
+				},
+			    };
+			    session.consumeRequest(req, response);
+			    stream_data_cb({}, "dorp");
+			    expect(step).toEqual(3);
+			});
+
+			it("successfully", function() {});
+		    });
 		});
 	    });
 	});

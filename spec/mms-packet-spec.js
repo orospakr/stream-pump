@@ -36,5 +36,14 @@ describe("MMS Packet", function() {
 	    var result = t.repack();
 	    expect(result).toMatchBuffer(expected);
 	});
+
+	it("should pack a data packet", function() {
+	    var d = new mms_packet.DataPacket(function() {}, function() {});
+	    var expected = new Buffer([0x24, 0x44, 0x05, 0x00, 0x00, 0x01, 0x02, 0x03, 0x04]);
+	    d.payload = new Buffer([0x00, 0x01, 0x02, 0x03, 0x04]);
+	    d.data_length = 5;
+	    var result = d.repack();
+	    expect(result).toMatchBuffer(expected);
+	});
     });
 });

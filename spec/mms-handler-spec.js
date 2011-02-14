@@ -20,6 +20,7 @@ describe('MMS Handler', function() {
     it("should respond to a push setup request", function() {
 	var req = {
 	    headers: {"content-type": "application/x-wms-pushsetup"},
+	    socket: {remoteAddress: "127.0.0.1"}
 	};
 	var received_head = false, received_end = false;
 	
@@ -50,6 +51,7 @@ describe('MMS Handler', function() {
 
 	    var req = {
 		headers: {"content-type": "application/x-wms-pushstart"},
+		socket: {remoteAddress: "127.0.0.1"}
 	    };
 	    var response = {};
 	    
@@ -89,7 +91,8 @@ describe('MMS Handler', function() {
 
 	it("should send a new client an error if stream is not ready", function() {
 	    var req = {
-		    headers: {}
+		headers: {},
+		socket: {remoteAddress: "127.0.0.1"}
 	    };
 	    var got_head = false;
 	    var got_end = false;
@@ -114,7 +117,8 @@ describe('MMS Handler', function() {
 
 	    it("should create a new session for an incoming client", function() {
 		var req = {
-	     	    headers: {}
+	     	    headers: {},
+		    socket: {remoteAddress: "127.0.0.1"}
 	     	};
 		var response = {};
 		var orig_mms_client_session = mms_client_session.MMSClientSession;
