@@ -66,6 +66,7 @@ describe("An MMS Client Session", function() {
 			writeHead: function(code, headers) {
 			    expect(headers["Content-Length"]).toBeUndefined();
 			    expect(headers["Content-Type"]).toBeUndefined();
+			    expect(hsp_util.getPragmaFields({"headers": headers})["client-id"]).toEqual("2147483647");
 	    		    expect(code).toEqual(200);
 	    		    got_head = true;
 			},
@@ -81,6 +82,35 @@ describe("An MMS Client Session", function() {
 		});
 
 		it("successfully", function() {});
+
+		describe("and then consumes the second pipeline request", function() {
+		    beforeEach(function() {
+			var req = {
+			    headers: {"Pragma": "pipeline-request=1"}
+			};
+			var got_head = false;
+			var got_end = false;
+			var response = {
+			    writeHead: function(code, headers) {
+				expect(headers["Content-Length"]).toEqual("0");
+				expect(headers["Content-Type"]).toBeUndefined();
+				expect(hsp_util.getPragmaFields({"headers": headers})["client-id"]).toEqual("2147483647");
+				expect(hsp_util.getPragmaFields({"headers": headers})["pipeline-result"]).toEqual("1");
+	    			expect(code).toEqual(200);
+	    			got_head = true;
+			    },
+			    end: function(data) {
+	    			expect(data).toBeUndefined();
+	    			expect(got_head).toBeTruthy();
+	    			got_end = true;
+			    }
+			};
+			session.consumeRequest(req, response);
+			expect(got_end).toBeTruthy();
+		    });
+
+		    it("successfully", function() {});
+		});
 	    });
 	});
     });

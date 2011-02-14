@@ -22,6 +22,15 @@ describe('utilities', function() {
 	    expect(hsp_util.getPragmaFields(req)["woot"]).toEqual("5000");
 	});
 
+	it("should retrieve values when Pragma field exists but is lowercase", function() {
+	    var req = {
+		headers: {"pragma": "woot=5000,somethingelse,myfield"}
+	    }
+	    expect(hsp_util.getPragmaFields(req)["myfield"]).toBeTruthy();
+	    expect(hsp_util.getPragmaFields(req)["myfieldx"]).toBeFalsy();
+	    expect(hsp_util.getPragmaFields(req)["woot"]).toEqual("5000");
+	});
+
 	it("should should return an empty hash when Pragma field is missing", function() {
 	    var req = {
 		headers: {"Pragmasafdsafdsaf": "woot=5000,somethingelse,myfield"}
