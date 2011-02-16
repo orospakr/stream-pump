@@ -14,10 +14,14 @@ COPYING for details.
 Dependencies
 ============
 
-* Node.js v0.2.5 (not tested with 0.4 yet)
+* Node.js v0.4
 * jasmine (http://pivotal.github.com/jasmine/), installed for use with
   Node
 * node-strtok (https://github.com/pgriess/node-strtok)
+
+NB. Node.js v0.4 doesn't realize that Pragma HTTP headers can be
+joined with commas.  Add `case 'pragma':` to the switch statement in
+`IncomingMessage.prototype._addHeaderLine` in node's lib/http.js.
 
 Both jasmine and node-strtok are available in NPM.
 
