@@ -5,6 +5,20 @@
 
 var hsp_util = require('../lib/util');
 
+var node_http = require('http');
+
+describe("node.js", function() {
+    it("should properly append Pragma HTTP headers as comma separated (this is a bug in node, see README)", function() {
+	var fake_http = {
+	    complete: true,
+	    trailers: {}
+	};
+	(node_http.IncomingMessage.prototype._addHeaderLine.bind(fake_http))("pragma", "stuff=1");
+	(node_http.IncomingMessage.prototype._addHeaderLine.bind(fake_http))("pragma", "hoorj");
+	expect(fake_http.trailers["pragma"]).toEqual("stuff=1, hoorj");
+    });
+});
+
 describe('utilities', function() {
     it("should convert an MS format binary UUID/GUID into its string representation", function() {
 	var blob = new Buffer([0x30, 0x26, 0xb2, 0x75, 0x8e, 0x66, 0xcf, 0x11, 0xa6, 0xd9, 0x00, 0xaa, 0x00, 0x62, 0xce, 0x6c]);
