@@ -16,7 +16,7 @@ describe("An MMS Client Session", function() {
 	describe("consumes a Describe request", function() {
 	    beforeEach(function() {
 		stream = { header: {
-		    repackWithGoofyHeader: function() {
+		    repackWithPreheader: function() {
 			return "I AM HEADER";
 		    }
 		}};

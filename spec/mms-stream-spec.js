@@ -32,8 +32,12 @@ describe('MMS Handler', function() {
 
     it("should inform a registered handler of an incoming data packet", function() {
 	var got_handler = false;
-	var test_packet = {name:"Data", repack: function() {return "dorp"}};
-	var ignore_packet = {name:"Header", repack: function() {return "dorp"}};
+	var test_packet = {name:"Data",
+			   repackWithPreheader: function(seq) {
+			       expect(seq).toEqual(0);
+			       return "dorp";
+			   }};
+	var ignore_packet = {name:"Header", repackWithPreheader: function() {return "dorp"}};
 	stream.onPacket("Data", function(packet, repacked_packet) {
 	    expect(packet).toBe(test_packet);
 	    expect(repacked_packet).toEqual("dorp");
@@ -46,8 +50,12 @@ describe('MMS Handler', function() {
 
     it("should inform a registered handler of all packets", function() {
 	var got_handlers = 0;
-	var test_packet = {name:"Header", repack: function() {return "dorp"}};
-	var test_packet1 = {name:"Data", repack: function() {return "dorp1"}};
+	var test_packet = {name:"Header", repackWithPreheader: function() {return "dorp"}};
+	var test_packet1 = {name:"Data",
+			    repackWithPreheader: function(seq) {
+				expect(seq).toEqual(0);
+				return "dorp1";
+			    }};
 	
 	stream.onPacket("all", function(packet, repacked_packet) {
 	    if(got_handlers === 0) {

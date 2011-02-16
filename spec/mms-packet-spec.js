@@ -56,8 +56,12 @@ describe("MMS Packet", function() {
 	});
 
 	it("should pack a data packet with the appropriate MMS payload preheader", function() {
-	    
+	    var d = new mms_packet.DataPacket(function() {}, function() {});
+	    var expected = new Buffer([0x24, 0x44, 0x0d, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0d, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05]);
+	    d.payload = new Buffer([0x01, 0x02, 0x03, 0x04, 0x05]);
+	    d.data_length = 5;
+	    var result = d.repackWithPreheader(1);
+	    expect(result).toMatchBuffer(expected);
 	});
     });
 });
-
