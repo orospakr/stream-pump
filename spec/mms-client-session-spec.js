@@ -61,7 +61,8 @@ describe("An MMS Client Session", function() {
 			headers: {"Pragma": "xPlayStrm=1"}
 		    };
 		    var stream_data_cb = undefined;
-		    stream.onDataPacket = function(cb) {
+		    stream.onPacket = function(kind, cb) {
+			expect(kind).toEqual("Data");
 			stream_data_cb = cb;
 		    };
 		    var step = 0; // 0: nowhere, 1: got HTTP headers, 2: got ASF header, 3: got data packet
