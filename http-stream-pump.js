@@ -16,9 +16,9 @@ var fs = require('fs');
 var strtok = require('strtok');
 
 
-var mms_handler = require('./lib/mms-handler');
+var mmsh_handler = require('./lib/mmsh-handler');
 
-var stream_handler = new mms_handler.MMSHandler();
+var stream_handler = new mmsh_handler.MMSHHandler();
 
 var reqHandler = function(req, response) {
     var pathname = url.parse(req.url).pathname;
