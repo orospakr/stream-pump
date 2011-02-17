@@ -14,7 +14,7 @@ COPYING for details.
 Website
 =======
 
-http://code.credil.org/projects/stream-pump
+[http://code.credil.org/projects/stream-pump](http://code.credil.org/projects/stream-pump)
 
 Synopsis
 ========
