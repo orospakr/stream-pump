@@ -1,0 +1,34 @@
+{"name": "http-stream-pump",
+ "version": "0.0.1",
+ "description": "HTTP live video stream reflector written in Node.js (currently only for Microsoft MMSH video streams).",
+ "keywords": ["http", "video", "mmsh", "mms", "wmp", "reflector"],
+ "maintainers": {"name": "Andrew Clunis",
+		 "email": "aclunis@credil.org",
+		 "web": "http://code.credil.org/projects/stream-pump"},
+ "bugs": {
+     "web": "http://code.credil.org/projects/stream-pump/issues"
+ },
+ "licenses": [
+     {
+	 "type": "GPLv3",
+     }
+ ],
+ "repositories": [
+     {
+	 "type": "git",
+	 "url": "git://github.com/orospakr/http-stream-pump.git",
+     }
+ ],
+ "dependencies": {
+     "jasmine-node": "1.0.0rc1",
+     "strtok": "0.1.1",
+ },
+ "scripts": {
+     "test": "specs.js",
+     "run": "http-stream-pump.js"
+ },
+ "directories": {
+     "lib": "lib",
+ },
+ "engines": ["node"],
+}

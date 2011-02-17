@@ -11,6 +11,11 @@ Written by Andrew Clunis <aclunis@credil.org>
 Licensed under the GNU General Public License, version 3.  Please see
 COPYING for details.
 
+Website
+=======
+
+http://code.credil.org/projects/stream-pump
+
 Synopsis
 ========
 
@@ -82,4 +87,7 @@ This is still very new, and kind of buggy.  My TODO notes follow:
 * do the integration tests
 * handle VLC clients
 * make appropriate behavoural descisions for the different user agents
-  as per the spec, such as it is.
+  as per the MMSH spec, such as it is.
+* Warn and fail if fragmented ASF headers (any packets?) arrive
+* Does the MMSH preheader location id field have a appropriate wrap
+  behaviour when it overflows the 32-bits?
