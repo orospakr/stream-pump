@@ -7,10 +7,10 @@ var util = require('util');
 
 var spec_helper = require("./spec_helper");
 
-var mms_demuxer = require('../lib/mms-demuxer');
-var mms_stream = require('../lib/mms-stream');
+var mmsh_demuxer = require('../lib/mmsh-demuxer');
+var mmsh_stream = require('../lib/mmsh-stream');
 
-describe('MMS Handler', function() {
+describe('MMSH Handler', function() {
     beforeEach(function() {
 	spec_helper.configureSpec.bind(this)();
 	demuxer = {
@@ -21,13 +21,13 @@ describe('MMS Handler', function() {
 
 	handler_func = {};
 	
-	var orig_dmux = mms_demuxer.MMSDemuxer;
-	mms_demuxer.MMSDemuxer = function(strm, handler_func_) {
+	var orig_dmux = mmsh_demuxer.MMSHDemuxer;
+	mmsh_demuxer.MMSHDemuxer = function(strm, handler_func_) {
 	    expect(strm).toBe(req_stream);
 	    handler_func = handler_func_;
 	};
-	stream = new mms_stream.MMSStream(req_stream, function() {});
-	mms_demuxer.MMSDemuxer = orig_dmux;
+	stream = new mmsh_stream.MMSHStream(req_stream, function() {});
+	mmsh_demuxer.MMSHDemuxer = orig_dmux;
     });
 
     it("should inform a registered handler of an incoming data packet", function() {

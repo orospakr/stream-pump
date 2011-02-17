@@ -3,11 +3,11 @@
 // Written by Andrew Clunis <aclunis@credil.org>
 // See COPYING for license terms.
 
-var mms_stream = require('../lib/mms-stream.js');
+var mmsh_stream = require('../lib/mmsh-stream.js');
 
 //module.exports = testCase({
     // setUp: function(cb) {
-    // 	this.stream = new mms_stream.MMSStream();
+    // 	this.stream = new mmsh_stream.MMSHStream();
     // },
 
     // shouldRefuseNewClientsWhenStreamNotStarted: {
@@ -26,7 +26,7 @@ var mms_stream = require('../lib/mms-stream.js');
 
     // streamOpened: {
     // 	setUp: function(cb) {
-    // 	    // it should start MMSDemuxer, begin listening for MMS packets from it
+    // 	    // it should start MMSHDemuxer, begin listening for MMSH packets from it
     // 	    // receiving PushStart request containing stream
 
     // 	    // let request have content type "application/x-wms-pushstart"

@@ -3,26 +3,26 @@
 // Written by Andrew Clunis <aclunis@credil.org>
 // See COPYING for license terms.
 
-var mms_demuxer = require('../lib/mms-demuxer.js');
+var mmsh_demuxer = require('../lib/mmsh-demuxer.js');
 
 var spec_helper = require('./spec_helper.js');
 
-var fixtures = require('./mms-demuxer-fixtures');
+var fixtures = require('./mmsh-demuxer-fixtures');
 
 var sys = require('sys');
 var util = require('util');
 
-describe('MMS Demuxer', function() {
+describe('MMSH Demuxer', function() {
     beforeEach(function() {
 	spec_helper.configureSpec.bind(this)();
     });
 
     it('should demux a stream of multiple packets', function() {
-	// Two MMS packets in a row; make sure we can parse multiple packets.
+	// Two MMSH packets in a row; make sure we can parse multiple packets.
 	var simplePacket = new Buffer([0x24, 0x44, 0x05, 0x00, 0x00, 0x01, 0x02, 0x03, 0x04, 0x24, 0x45, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00]);
 	var stream = new spec_helper.MockStream();
 	var received = 0;
-    	var testD = new mms_demuxer.MMSDemuxer(stream, function(packet) {
+    	var testD = new mmsh_demuxer.MMSHDemuxer(stream, function(packet) {
 	    if(received === 0) {
 		expect(packet.payload.length).toEqual(5);
 		expect(packet.name).toEqual("Data");
@@ -44,7 +44,7 @@ describe('MMS Demuxer', function() {
 	var simplePacket = new Buffer([0x19, 0x44, 0x05]);
     	var stream = new spec_helper.MockStream();
 	var got_error = false;
-    	var testD = new mms_demuxer.MMSDemuxer(stream, function(packet) {
+    	var testD = new mmsh_demuxer.MMSHDemuxer(stream, function(packet) {
 	    expect().toNotGetHere();
     	}.bind(this), function(error) {
 	    got_error = true;
@@ -55,11 +55,11 @@ describe('MMS Demuxer', function() {
 
     describe("packet parsing", function() {
 	it("should parse a Data packet", function() {
-	    // MMS "data" packet, "B" bit not set, 5 bytes payload
+	    // MMSH "data" packet, "B" bit not set, 5 bytes payload
     	    var simplePacket = new Buffer([0x24, 0x44, 0x05, 0x00, 0x00, 0x01, 0x02, 0x03, 0x04]);
     	    var stream = new spec_helper.MockStream();
 	    var gotPacket = false;
-    	    var testD = new mms_demuxer.MMSDemuxer(stream, function(packet) {
+    	    var testD = new mmsh_demuxer.MMSHDemuxer(stream, function(packet) {
     		expect(packet.payload.length).toEqual(5);
 		gotPacket = true;
     	    }.bind(this), function(error) {
@@ -77,7 +77,7 @@ describe('MMS Demuxer', function() {
 	it("should demux a stream change notification packet", function() {
 	    var stream = new spec_helper.MockStream();
 	    var got_packet = false;
-    	    var testD = new mms_demuxer.MMSDemuxer(stream, function(packet) {
+    	    var testD = new mmsh_demuxer.MMSHDemuxer(stream, function(packet) {
     		expect(packet.data_length).toEqual(4);
     		expect(packet.reason).toEqual(0x00);
 		got_packet = true;
@@ -92,7 +92,7 @@ describe('MMS Demuxer', function() {
 	it("should parse an end of stream packet", function() {
 	    var stream = new spec_helper.MockStream();
 	    var got_packet = false;
-    	    var testD = new mms_demuxer.MMSDemuxer(stream, function(packet) {
+    	    var testD = new mmsh_demuxer.MMSHDemuxer(stream, function(packet) {
     		expect(packet.data_length).toEqual(4);
     		expect(packet.reasonOkay()).toBeTruthy();
 		got_packet = true;
@@ -106,7 +106,7 @@ describe('MMS Demuxer', function() {
 	it("should parse a header packet", function() {
 	    var stream = new spec_helper.MockStream();
 	    var got_packet = false;
-    	    var testD = new mms_demuxer.MMSDemuxer(stream, function(packet) {
+    	    var testD = new mmsh_demuxer.MMSHDemuxer(stream, function(packet) {
     		expect(packet.data_length).toEqual(5);
     		expect(packet.payload.length).toEqual(5);
 		got_packet = true;
@@ -120,7 +120,7 @@ describe('MMS Demuxer', function() {
 	it("should parse a metadata packet", function() {
 	    var stream = new spec_helper.MockStream();
 	    var got_packet = false;
-    	    var testD = new mms_demuxer.MMSDemuxer(stream, function(packet) {
+    	    var testD = new mmsh_demuxer.MMSHDemuxer(stream, function(packet) {
     		expect(packet.data_length).toEqual(5);
     		expect(packet.payload.length).toEqual(5);
 		got_packet = true;
@@ -138,7 +138,7 @@ describe('MMS Demuxer', function() {
 	    var packet_received = false;
 	    expect(fixtures.header_packet).toBeDefined();
 	    expect(fixtures.header_packet.length).toEqual(5499);
-	    var demux = new mms_demuxer.MMSDemuxer(stream, function(packet) {
+	    var demux = new mmsh_demuxer.MMSHDemuxer(stream, function(packet) {
 		expect(packet_received).toBeFalsy();
 		expect(packet.name).toEqual("Header");
 		expect(packet.repack()).toMatchBuffer(fixtures.header_packet);
@@ -155,7 +155,7 @@ describe('MMS Demuxer', function() {
 	    var packet_received = false;
 	    expect(fixtures.header_packet2).toBeDefined();
 	    expect(fixtures.header_packet2.length).toEqual(5465);
-	    var demux = new mms_demuxer.MMSDemuxer(stream, function(packet) {
+	    var demux = new mmsh_demuxer.MMSHDemuxer(stream, function(packet) {
 		expect(packet_received).toBeFalsy();
 		expect(packet.name).toEqual("Header");
 		expect(packet.repack()).toMatchBuffer(fixtures.header_packet2);

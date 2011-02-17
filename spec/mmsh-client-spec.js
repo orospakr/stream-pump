@@ -7,14 +7,14 @@ var util = require('util');
 
 var spec_helper = require("./spec_helper.js");
 
-var mms_handler = require('../lib/mms-handler.js');
-var mms_stream = require('../lib/mms-stream.js');
-var mms_client_session = require('../lib/mms-client-session.js');
+var mmsh_handler = require('../lib/mmsh-handler.js');
+var mmsh_stream = require('../lib/mmsh-stream.js');
+var mmsh_client_session = require('../lib/mmsh-client-session.js');
 
-describe('MMS Handler', function() {
+describe('MMSH Handler', function() {
     beforeEach(function() {
 	spec_helper.configureSpec.bind(this)();
-	handler = new mms_handler.MMSHandler();
+	handler = new mmsh_handler.MMSHHandler();
     });
   
     it("should respond to a push setup request", function() {
@@ -55,7 +55,7 @@ describe('MMS Handler', function() {
 	    };
 	    var response = {};
 	    
-	    var orig_stream = mms_stream.MMSStream;
+	    var orig_stream = mmsh_stream.MMSHStream;
 
 	    var setStreamMock = function(mock) {
 		stream = mock;
@@ -64,7 +64,7 @@ describe('MMS Handler', function() {
 	    var constructor_called = false;
 	    var demuxer_constructor_called = false;
 
-	    mms_stream.MMSStream = function(breq, error_cb) {
+	    mmsh_stream.MMSHStream = function(breq, error_cb) {
 		expect(breq).toBe(req);
 		setStreamMock(this);
 		constructor_called = true;
@@ -82,7 +82,7 @@ describe('MMS Handler', function() {
 	    
 	    expect(constructor_called).toBeTruthy();
 	    
-	    mms_stream.MMSStream = orig_stream;
+	    mmsh_stream.MMSHStream = orig_stream;
 	});
 	
 	it("should open stream in response to an pushstart request", function() {
@@ -121,12 +121,12 @@ describe('MMS Handler', function() {
 		    socket: {remoteAddress: "127.0.0.1"}
 	     	};
 		var response = {};
-		var orig_mms_client_session = mms_client_session.MMSClientSession;
-		var got_mms_client_constructor = false;
+		var orig_mmsh_client_session = mmsh_client_session.MMSHClientSession;
+		var got_mmsh_client_constructor = false;
 		var got_consume_request = false;
-		mms_client_session.MMSClientSession = function(strm, verifier_routine) {
+		mmsh_client_session.MMSHClientSession = function(strm, verifier_routine) {
 		    expect(strm).toBe(stream);
-		    got_mms_client_constructor = true;
+		    got_mmsh_client_constructor = true;
 		    // TODO unit test the verifier routine here... awkward, because I'd have to do
 		    // this whole thing over again
 		    this.consumeRequest = function(rq, resp) {
@@ -136,9 +136,9 @@ describe('MMS Handler', function() {
 		    };
 		};
 		handler.consumeRequest(req, response);
-		expect(got_mms_client_constructor).toBeTruthy();
+		expect(got_mmsh_client_constructor).toBeTruthy();
 		expect(got_consume_request).toBeTruthy();
-		mms_client_session.MMSClientSession = orig_mms_client_session;
+		mmsh_client_session.MMSHClientSession = orig_mmsh_client_session;
 	    });
 	});
     });

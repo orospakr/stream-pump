@@ -3,11 +3,11 @@
 // Written by Andrew Clunis <aclunis@credil.org>
 // See COPYING for license terms.
 
-var mms_client_session = require("../lib/mms-client-session");
+var mmsh_client_session = require("../lib/mmsh-client-session");
 var spec_helper = require('./spec_helper');
 var hsp_util = require("../lib/util");
 
-describe("An MMS Client Session", function() {
+describe("An MMSH Client Session", function() {
     beforeEach(function() {
 	spec_helper.configureSpec.bind(this)();
     });
@@ -26,7 +26,7 @@ describe("An MMS Client Session", function() {
 		Math.random = function() {
 		    return 0.5;
 		}
-		session = new mms_client_session.MMSClientSession(stream, verifyIsIDUnique);
+		session = new mmsh_client_session.MMSHClientSession(stream, verifyIsIDUnique);
 
  		var req = {
 		    headers: {}
