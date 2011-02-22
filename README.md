@@ -39,14 +39,13 @@ It does *not*:
 * Format/protocol conversion
 * Anything deeper than the highest layer of encapsulation
 * Do sophisticated playlist control
-mark
 * Do DRM (well, duh)
 
 Dependencies
 ============
 
 * Node.js v0.4
-* jasmine (http://pivotal.github.com/jasmine/), installed for use with
+* jasmine-node (http://pivotal.github.com/jasmine/), installed for use with
   Node
 * node-strtok (https://github.com/pgriess/node-strtok)
 

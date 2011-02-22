@@ -57,13 +57,19 @@ describe("An MMSH Client Session", function() {
 
 	    describe("and then is asked to start playing the stream", function() {
 		beforeEach(function() {
-		    var req = {
-			headers: {"Pragma": "xPlayStrm=1"}
+		    close_cb = undefined;
+		    req = {
+			headers: {"Pragma": "xPlayStrm=1"},
+			socket: {once: function(event, cb) {
+			    expect(event).toEqual("close");
+			    close_cb = cb;
+			}}
 		    };
 		    var stream_data_cb = undefined;
 		    stream.onPacket = function(kind, cb) {
 			expect(kind).toEqual("Data");
 			stream_data_cb = cb;
+			return 42;
 		    };
 		    var step = 0; // 0: nowhere, 1: got HTTP headers, 2: got ASF header, 3: got data packet
 		    var header_packet = {};
@@ -91,6 +97,16 @@ describe("An MMSH Client Session", function() {
 		});
 
 		it("successfully", function() {});
+
+		it("should unregister from Stream when client disconnects", function() {
+		    var got_rm_on = false;
+		    stream.rmOnPacket = function(token) {
+			expect(token).toEqual(42);
+			got_rm_on = true;
+		    };
+		    close_cb();
+		    expect(got_rm_on).toBeTruthy();
+		});
 	    });
 	});
     });

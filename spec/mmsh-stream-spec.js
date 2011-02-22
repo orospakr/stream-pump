@@ -48,6 +48,28 @@ describe('MMSH Handler', function() {
 	expect(got_handler).toBeTruthy();
     });
 
+    it("should remove a registered handler", function() {
+	var got_handler = false;
+	var test_packet = {name:"Data",
+			   repackWithPreheader: function(seq) {
+			       expect(seq).toEqual(0);
+			       return "dorp";
+			   }};
+	var after_packet = {name: "Data", repackWithPreheader: function(seq){ }};
+	var ignore_packet = {name:"Header", repackWithPreheader: function() {return "dorp"}};
+	var token = stream.onPacket("Data", function(packet, repacked_packet) {
+	    expect(got_handler).toBeFalsy();
+	    expect(packet).toBe(test_packet);
+	    expect(repacked_packet).toEqual("dorp");
+	    got_handler = true;
+	});
+	handler_func(test_packet);
+	handler_func(ignore_packet);
+	stream.rmOnPacket(token);
+	handler_func(after_packet);
+	expect(got_handler).toBeTruthy();
+    });
+
     it("should inform a registered handler of all packets", function() {
 	var got_handlers = 0;
 	var test_packet = {name:"Header", repackWithPreheader: function() {return "dorp"}};
