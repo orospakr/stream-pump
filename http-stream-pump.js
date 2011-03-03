@@ -6,6 +6,7 @@
 // See COPYING for license terms.
 
 var http = require('http');
+var https = require('https');
 
 var util = require('util');
 
@@ -29,25 +30,25 @@ var reqHandler = function(req, response) {
 	stream_handler.consumeRequest(req, response);
     } else {
 	response.writeHead(404, {"Content-Type": "text/html"});
-	// console.log("Do they support chunked?!");
-	// if(response.chunkedEncoding) {
-	//     console.log("... yes!");
-	// } else {
-	//     console.log("... no :(");
-	// }
+
 	response.end("Sorry, nothing here!");
 	console.log("404'd: Attempt to fetch " + pathname);
 	
 	return;
     }
-
-    // console.log(util.inspect(response));
 };
 
 console.log("Starting up HTTP Stream Pump!");
 
+// var ssl_options = {
+//     key: fs.readFileSync('/home/orospakr/nipcow/self_signed_test/server.key'),
+//     cert: fs.readFileSync('/home/orospakr/nipcow/self_signed_test/server.crt')
+// };
+
 var serverv4 = http.createServer(reqHandler);
+// var serverv4https = https.createServer(ssl_options, reqHandler);
 // var serverv6 = http.createServer(reqHandler);
 
-serverv4.listen(8086, "0.0.0.0")
+serverv4.listen(8080, "0.0.0.0");
+serverv4https.listen(8084, "0.0.0.0");
 //serverv6.listen(8086, "::");
