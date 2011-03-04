@@ -64,7 +64,8 @@ describe("MMSH Push Source", function() {
 	describe("and stream becomes ready", function() {
 	    beforeEach(function() {
 		var got_ready = false;
-		source.on("ready", function() {
+		source.on("ready", function(strm) {
+		    expect(strm).toBe(stream);
 		    got_ready = true;
 		});
 		stream.emit("ready");

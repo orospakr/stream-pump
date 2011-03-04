@@ -17,10 +17,12 @@ var fs = require('fs');
 var strtok = require('strtok');
 
 var mmsh_push_source = require('./lib/mmsh-push-source');
+var mmsh_pull_source = require('./lib/mmsh-pull-source');
 var mmsh_handler = require('./lib/mmsh-handler');
 
-var push_source = new mmsh_push_source.MMSHPushSource();
-var stream_handler = new mmsh_handler.MMSHHandler(push_source);
+//var source = new mmsh_push_source.MMSHPushSource();
+var source = new mmsh_pull_source.MMSHPullSource({host:"127.0.0.1", port: "7070", path: "/"});
+var stream_handler = new mmsh_handler.MMSHHandler(source);
 
 var reqHandler = function(req, response) {
     var pathname = url.parse(req.url).pathname;
