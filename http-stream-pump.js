@@ -16,10 +16,11 @@ var fs = require('fs');
 
 var strtok = require('strtok');
 
-
+var mmsh_push_source = require('./lib/mmsh-push-source');
 var mmsh_handler = require('./lib/mmsh-handler');
 
-var stream_handler = new mmsh_handler.MMSHHandler();
+var push_source = new mmsh_push_source.MMSHPushSource();
+var stream_handler = new mmsh_handler.MMSHHandler(push_source);
 
 var reqHandler = function(req, response) {
     var pathname = url.parse(req.url).pathname;
@@ -28,6 +29,8 @@ var reqHandler = function(req, response) {
 
     if(pathname.match(/^\/video/i)) {
 	stream_handler.consumeRequest(req, response);
+    } else if(pathname.match(/^\/videopush/i))  {
+	push_source.consumeRequest(req, response);
     } else {
 	response.writeHead(404, {"Content-Type": "text/html"});
 
@@ -50,5 +53,5 @@ var serverv4 = http.createServer(reqHandler);
 // var serverv6 = http.createServer(reqHandler);
 
 serverv4.listen(8080, "0.0.0.0");
-serverv4https.listen(8084, "0.0.0.0");
+// serverv4https.listen(8084, "0.0.0.0");
 //serverv6.listen(8086, "::");

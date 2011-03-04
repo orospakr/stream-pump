@@ -48,6 +48,24 @@ describe('MMSH Handler', function() {
 	expect(got_handler).toBeTruthy();
     });
 
+    it("should fire a ready event when it has received its header", function() {
+	var got_ready = false;
+	var header_packet = {name:"Header", repackWithPreheader: function() {return "dorp"}};
+	var ready_handler = function(packet, repacked_data) {
+	    expect(packet).toBe(header_packet);
+	    expect(repacked_data).toEqual("dorp");
+	    got_ready = true;
+	}.bind(this);
+
+	stream.on("ready", function() {
+	    got_ready = true;
+	});
+
+	handler_func(header_packet);
+
+	expect(got_ready).toBeTruthy();
+    });
+
     it("should remove a registered handler", function() {
 	var got_handler = false;
 	var test_packet = {name:"Data",
