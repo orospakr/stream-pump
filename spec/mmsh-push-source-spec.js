@@ -4,11 +4,17 @@
 // See COPYING for license terms.
 
 var mmsh_push_source = require("../lib/mmsh-push-source");
+var mmsh_stream = require("../lib/mmsh-stream");
+
+var events = require('events');
+
+var sys = require('sys');
+
+var util = require('util');
 
 describe("MMSH Push Source", function() {
     beforeEach(function() {
-	stream_source = {};
-	source = new mmsh_push_source.MMSHPushSource(stream_source);
+	source = new mmsh_push_source.MMSHPushSource();
     });
 
     it("should instantiate", function() {
@@ -34,7 +40,42 @@ describe("MMSH Push Source", function() {
 	expect(got_end).toBeTruthy();
     });
 
-    it("should handle a push start request and create a stream", function() {
-	var req = {headers:{"content-type":"application/x-wms-pushsetup"}};
+    describe("once a push is started", function() {
+	beforeEach(function() {
+	    orig_mmsh_stream = mmsh_stream.MMSHStream;
+	    req = {headers:{"content-type":"application/x-wms-pushstart"}};
+	    stream_created = false;
+	    stream = undefined;
+	    mmsh_stream.MMSHStream = function(rq, error_handler) {
+		expect(rq).toBe(req);
+		stream_created = true;
+		events.EventEmitter.call(this);
+		stream = this;
+	    };
+	    sys.inherits(mmsh_stream.MMSHStream, events.EventEmitter);
+
+	    response = {};
+	    source.consumeRequest(req, response);
+	    expect(stream_created).toBeTruthy();
+	});
+
+	it("should succeed", function() { });
+
+	describe("and stream becomes ready", function() {
+	    beforeEach(function() {
+		var got_ready = false;
+		source.on("ready", function() {
+		    got_ready = true;
+		});
+		stream.emit("ready");
+		expect(got_ready).toBeTruthy();
+	    });
+
+	    it("should succeed", function() { });
+	});
+
+	afterEach(function() {
+	    mmsh_stream.MMSHStream = orig_mmsh_stream;
+	});
     });
 });
