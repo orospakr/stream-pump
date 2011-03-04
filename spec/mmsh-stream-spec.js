@@ -38,11 +38,11 @@ describe('MMSH Handler', function() {
 			       return "dorp";
 			   }};
 	var ignore_packet = {name:"Header", repackWithPreheader: function() {return "dorp"}};
-	stream.onPacket("Data", function(packet, repacked_packet) {
+	stream.on("Data", function(packet, repacked_packet) {
 	    expect(packet).toBe(test_packet);
 	    expect(repacked_packet).toEqual("dorp");
 	    got_handler = true;
-	});
+	}.bind(this));
 	handler_func(test_packet);
 	handler_func(ignore_packet);
 	expect(got_handler).toBeTruthy();
@@ -57,15 +57,16 @@ describe('MMSH Handler', function() {
 			   }};
 	var after_packet = {name: "Data", repackWithPreheader: function(seq){ }};
 	var ignore_packet = {name:"Header", repackWithPreheader: function() {return "dorp"}};
-	var token = stream.onPacket("Data", function(packet, repacked_packet) {
+	var data_handler = function(packet, repacked_packet) {
 	    expect(got_handler).toBeFalsy();
 	    expect(packet).toBe(test_packet);
 	    expect(repacked_packet).toEqual("dorp");
 	    got_handler = true;
-	});
+	}.bind(this); 
+	stream.on("Data", data_handler);
 	handler_func(test_packet);
 	handler_func(ignore_packet);
-	stream.rmOnPacket(token);
+	stream.removeListener("Data", data_handler);
 	handler_func(after_packet);
 	expect(got_handler).toBeTruthy();
     });
@@ -79,7 +80,7 @@ describe('MMSH Handler', function() {
 				return "dorp1";
 			    }};
 	
-	stream.onPacket("all", function(packet, repacked_packet) {
+	stream.on("all", function(packet, repacked_packet) {
 	    if(got_handlers === 0) {
 		expect(packet).toBe(test_packet);
 		expect(repacked_packet).toEqual("dorp");
@@ -89,7 +90,7 @@ describe('MMSH Handler', function() {
 		expect(repacked_packet).toEqual("dorp1");
 		got_handlers = 2;
 	    }
-	});
+	}.bind(this));
 	handler_func(test_packet);
 	handler_func(test_packet1);
 	expect(got_handlers).toEqual(2);
