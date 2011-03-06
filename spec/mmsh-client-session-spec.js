@@ -6,6 +6,8 @@
 var mmsh_client_session = require("../lib/mmsh-client-session");
 var spec_helper = require('./spec_helper');
 var hsp_util = require("../lib/util");
+var events = require('events');
+var util = require('util');
 
 describe("An MMSH Client Session", function() {
     beforeEach(function() {
@@ -15,11 +17,12 @@ describe("An MMSH Client Session", function() {
     describe("when new", function() {
 	describe("consumes a Describe request", function() {
 	    beforeEach(function() {
-		stream = { header: {
-		    repackWithPreheader: function() {
+		stream = new events.EventEmitter();
+
+		stream["header"] = {repackWithPreheader:function() {
 			return "I AM HEADER";
-		    }
 		}};
+		
 		var verifyIsIDUnique = function(id) { return true; };
 		
 		var orig_rand = Math.random;
@@ -66,11 +69,11 @@ describe("An MMSH Client Session", function() {
 			}}
 		    };
 		    var stream_data_cb = undefined;
-		    stream.onPacket = function(kind, cb) {
-			expect(kind).toEqual("Data");
-			stream_data_cb = cb;
-			return 42;
-		    };
+		    // stream.on("data",function(kind, cb) {
+		    // 	expect(kind).toEqual("Data");
+		    // 	stream_data_cb = cb;
+		    // 	return 42;
+		    // };
 		    var step = 0; // 0: nowhere, 1: got HTTP headers, 2: got ASF header, 3: got data packet
 		    var header_packet = {};
 		    var response = {
@@ -92,20 +95,17 @@ describe("An MMSH Client Session", function() {
 			},
 		    };
 		    session.consumeRequest(req, response);
-		    stream_data_cb({}, "dorp");
+		    stream.emit("Data", {}, "dorp");
 		    expect(step).toEqual(3);
 		});
 
 		it("successfully", function() {});
 
 		it("should unregister from Stream when client disconnects", function() {
-		    var got_rm_on = false;
-		    stream.rmOnPacket = function(token) {
-			expect(token).toEqual(42);
-			got_rm_on = true;
-		    };
 		    close_cb();
-		    expect(got_rm_on).toBeTruthy();
+
+		    // check that listener on EventEmitter has been removed
+		    expect(stream._events["Data"]).toBeUndefined();
 		});
 	    });
 	});
