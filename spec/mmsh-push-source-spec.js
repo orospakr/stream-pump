@@ -46,7 +46,8 @@ describe("MMSH Push Source", function() {
 	    req = {headers:{"content-type":"application/x-wms-pushstart"}};
 	    stream_created = false;
 	    stream = undefined;
-	    mmsh_stream.MMSHStream = function(rq, error_handler) {
+	    mmsh_stream.MMSHStream = function(rq, includes_preheaders, error_handler) {
+		expect(includes_preheaders).toBeFalsy();
 		expect(rq).toBe(req);
 		stream_created = true;
 		events.EventEmitter.call(this);

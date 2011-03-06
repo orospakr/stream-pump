@@ -11,6 +11,10 @@ describe("MMSH Packet", function() {
 	spec_helper.configureSpec.bind(this)();
     });
 
+    describe("packet unpacking", function() {
+	// This logic is tested in MMSHDemuxerSpec.
+    });
+
     describe("packet repacking", function() {
 	it("should repack a header packet", function() {
 	    var h = new mmsh_packet.HeaderPacket(function() {}, function() {});

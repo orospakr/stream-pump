@@ -22,7 +22,7 @@ describe('MMSH Demuxer', function() {
 	var simplePacket = new Buffer([0x24, 0x44, 0x05, 0x00, 0x00, 0x01, 0x02, 0x03, 0x04, 0x24, 0x45, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00]);
 	var stream = new spec_helper.MockStream();
 	var received = 0;
-    	var testD = new mmsh_demuxer.MMSHDemuxer(stream, function(packet) {
+    	var testD = new mmsh_demuxer.MMSHDemuxer(stream, false, function(packet) {
 	    if(received === 0) {
 		expect(packet.payload.length).toEqual(5);
 		expect(packet.name).toEqual("Data");
@@ -44,7 +44,7 @@ describe('MMSH Demuxer', function() {
 	var simplePacket = new Buffer([0x19, 0x44, 0x05]);
     	var stream = new spec_helper.MockStream();
 	var got_error = false;
-    	var testD = new mmsh_demuxer.MMSHDemuxer(stream, function(packet) {
+    	var testD = new mmsh_demuxer.MMSHDemuxer(stream, false, function(packet) {
 	    expect().toNotGetHere();
     	}.bind(this), function(error) {
 	    got_error = true;
@@ -59,8 +59,9 @@ describe('MMSH Demuxer', function() {
     	    var simplePacket = new Buffer([0x24, 0x44, 0x05, 0x00, 0x00, 0x01, 0x02, 0x03, 0x04]);
     	    var stream = new spec_helper.MockStream();
 	    var gotPacket = false;
-    	    var testD = new mmsh_demuxer.MMSHDemuxer(stream, function(packet) {
+    	    var testD = new mmsh_demuxer.MMSHDemuxer(stream, false, function(packet) {
     		expect(packet.payload.length).toEqual(5);
+		expect(packet.name).toEqual("Data");
 		gotPacket = true;
     	    }.bind(this), function(error) {
 		console.log("Got an error: " + error);
@@ -77,9 +78,10 @@ describe('MMSH Demuxer', function() {
 	it("should demux a stream change notification packet", function() {
 	    var stream = new spec_helper.MockStream();
 	    var got_packet = false;
-    	    var testD = new mmsh_demuxer.MMSHDemuxer(stream, function(packet) {
+    	    var testD = new mmsh_demuxer.MMSHDemuxer(stream, false, function(packet) {
     		expect(packet.data_length).toEqual(4);
     		expect(packet.reason).toEqual(0x00);
+		expect(packet.name).toEqual("Stream Change");
 		got_packet = true;
     	    }.bind(this), function(error) {
 		expect().toNotGetHere();
@@ -92,9 +94,10 @@ describe('MMSH Demuxer', function() {
 	it("should parse an end of stream packet", function() {
 	    var stream = new spec_helper.MockStream();
 	    var got_packet = false;
-    	    var testD = new mmsh_demuxer.MMSHDemuxer(stream, function(packet) {
+    	    var testD = new mmsh_demuxer.MMSHDemuxer(stream, false, function(packet) {
     		expect(packet.data_length).toEqual(4);
     		expect(packet.reasonOkay()).toBeTruthy();
+		expect(packet.name).toEqual("End of Stream");
 		got_packet = true;
     	    }.bind(this), function(error) {
 		expect().toNotGetHere();
@@ -106,7 +109,7 @@ describe('MMSH Demuxer', function() {
 	it("should parse a header packet", function() {
 	    var stream = new spec_helper.MockStream();
 	    var got_packet = false;
-    	    var testD = new mmsh_demuxer.MMSHDemuxer(stream, function(packet) {
+    	    var testD = new mmsh_demuxer.MMSHDemuxer(stream, false, function(packet) {
     		expect(packet.data_length).toEqual(5);
     		expect(packet.payload.length).toEqual(5);
 		got_packet = true;
@@ -120,15 +123,34 @@ describe('MMSH Demuxer', function() {
 	it("should parse a metadata packet", function() {
 	    var stream = new spec_helper.MockStream();
 	    var got_packet = false;
-    	    var testD = new mmsh_demuxer.MMSHDemuxer(stream, function(packet) {
+    	    var testD = new mmsh_demuxer.MMSHDemuxer(stream, false, function(packet) {
     		expect(packet.data_length).toEqual(5);
     		expect(packet.payload.length).toEqual(5);
+		expect(packet.payload).toMatchBuffer(new Buffer([0x01, 0x02, 0x03, 0x04, 0x05]));
 		got_packet = true;
     	    }.bind(this), function(error) {
     		expect().notToGetHere();
     	    }.bind(this));
     	    stream.injectData(new Buffer([0x24, 0x4D, 0x05, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05]));
 	    expect(got_packet).toBeTruthy();
+	});
+
+	describe("with the MMSH preheader", function() {
+	    // TODO for now, we're just going to strip that shit off and regenerate ourselves when the time comes
+	    it("should parse a header packet", function() {
+		var stream = new spec_helper.MockStream();
+		var got_packet = false;
+    		var testD = new mmsh_demuxer.MMSHDemuxer(stream, true, function(packet) {
+    		    expect(packet.data_length).toEqual(5);
+    		    expect(packet.payload.length).toEqual(5);
+		    expect(packet.payload).toMatchBuffer(new Buffer([0x01, 0x02, 0x03, 0x04, 0x05]));
+		    got_packet = true;
+    		}.bind(this), function(error) {
+		    expect().toNotGetHere();
+    		}.bind(this));
+    		stream.injectData(new Buffer([0x24, 0x48, 0x0D, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0c, 0x0D, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05]));
+		expect(got_packet).toBeTruthy();
+	    });
 	});
     });
 
@@ -138,7 +160,7 @@ describe('MMSH Demuxer', function() {
 	    var packet_received = false;
 	    expect(fixtures.header_packet).toBeDefined();
 	    expect(fixtures.header_packet.length).toEqual(5499);
-	    var demux = new mmsh_demuxer.MMSHDemuxer(stream, function(packet) {
+	    var demux = new mmsh_demuxer.MMSHDemuxer(stream, false, function(packet) {
 		expect(packet_received).toBeFalsy();
 		expect(packet.name).toEqual("Header");
 		expect(packet.repack()).toMatchBuffer(fixtures.header_packet);
@@ -155,7 +177,7 @@ describe('MMSH Demuxer', function() {
 	    var packet_received = false;
 	    expect(fixtures.header_packet2).toBeDefined();
 	    expect(fixtures.header_packet2.length).toEqual(5465);
-	    var demux = new mmsh_demuxer.MMSHDemuxer(stream, function(packet) {
+	    var demux = new mmsh_demuxer.MMSHDemuxer(stream, false, function(packet) {
 		expect(packet_received).toBeFalsy();
 		expect(packet.name).toEqual("Header");
 		expect(packet.repack()).toMatchBuffer(fixtures.header_packet2);
