@@ -66,7 +66,7 @@ config.config.streams.forEach(function(strm) {
 	r.handler = new mmsh_handler.MMSHHandler(r.source);
 	handlers.push(r);
 	// add an extra handler for the push source
-	handlers.push({path:strm.path + "_push", handler: r.source});
+	handlers.push({path: strm.path + "_push", handler: r.source});
     } else {
 	log.error(c, "Unknown source type: " + strm.type);
 	return;
@@ -89,8 +89,9 @@ var reqHandler = function(req, response) {
 
     var hit_handler = false;
     handlers.forEach(function(handler) {
-	var regex_str = "^\\/streams\\/" + handler.path
+	var regex_str = "^\\/streams\\/" + handler.path + "(\\/$|$)"
 	if(pathname.match(new RegExp(regex_str, "i"))) {
+	    console.log("HIT");
 	    handler.handler.consumeRequest(req, response);
 	    hit_handler = true;
 	}

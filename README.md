@@ -63,7 +63,7 @@ Run the test suite first, to ensure sanity:
 
     $ ./specs.js
 
-Look in `config.example.js`, copy and adjust to taste.
+Look in `config.js.example`, copy and adjust to taste.
 
 Create as many streams as you like in config.js.  The only two types
 you choose right now are `mmsh_push` and `mmsh_pull`.  The stream
@@ -93,7 +93,6 @@ This is still very new, and kind of buggy.  My TODO notes follow:
 * add docstrings
 * handle push stream terminating (either nice EOS or socket close),
   and reattaching
-* handle client leaving
 * dealing with client showing up with unknown id
 * do the integration tests
 * handle VLC clients
