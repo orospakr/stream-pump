@@ -6,7 +6,8 @@ only supports Microsoft MMSH video streams.
 
 Copyright 2010-2011 Government of Canada
 
-Written by Andrew Clunis <aclunis@credil.org>
+Written by Andrew Clunis <aclunis@credil.org>, at CREDIL
+(http://www.credil.org)
 
 Licensed under the GNU General Public License, version 3.  Please see
 COPYING for details.
