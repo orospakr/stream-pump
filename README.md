@@ -61,7 +61,7 @@ spec suite tests make sure that this issue is fixed.
 Usage
 =====
 
-Run the test suite first, to increase confidence of sanity:
+To increase confidence of sanity, run the test suite first:
 
     $ ./specs.js
 
