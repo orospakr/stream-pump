@@ -29,18 +29,19 @@ video to many clients behind a bottle-neck.
 
 It does:
 
-* Bounce a live HTTP video stream from one source to many clients
+* bounce a live HTTP video stream from one source to many clients
   (currently only MMSH supported)
-* Not ridiculously complicated to set up
-* Nest within itself; that is, you can daisy-chain Stream Pumps
+* simple setup
+* nest within itself; that is, you can daisy-chain Stream Pumps
 
-It does *not*:
+It does *not* do:
 
-* Do transcoding
-* Format/protocol conversion
-* Anything deeper than the highest layer of encapsulation
-* Do sophisticated playlist control
-* Do DRM (well, duh)
+* transcoding
+* format/protocol conversion
+* manipulation of anything deeper than the highest layer of
+  encapsulation
+* sophisticated playlist control
+* DRM (well, duh)
 
 Dependencies
 ============

@@ -47,8 +47,7 @@ config.config.streams.forEach(function(strm) {
     var failure = function(reason) {
 	log.error(c, "... unable to start stream (" + strm.name + "), because: " + reason);
     };
-    // TODO test to make sure "path" is a valid URI fragment for HTTP
-    // "^[a-zA-Z0-9_]*$"
+
     if (!(strm.path.match(/^[a-zA-Z0-9_]*$/))) {
 	failure("Specified stream path contains inappropriate characters: " + strm.path);
 	return;
@@ -77,10 +76,6 @@ config.config.streams.forEach(function(strm) {
 if(handlers.length === 0) {
     log.warn(c, "No streams have been configured.  Idle...");
 }
-
-//var source = new mmsh_push_source.MMSHPushSource();
-// var source = new mmsh_pull_source.MMSHPullSource({host:"127.0.0.1", port: "7070", path: "/"});
-// var stream_handler = new mmsh_handler.MMSHHandler(source);
 
 var reqHandler = function(req, response) {
     var pathname = url.parse(req.url).pathname;
