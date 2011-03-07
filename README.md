@@ -63,15 +63,25 @@ Run the test suite first, to ensure sanity:
 
     $ ./specs.js
 
-Lots of stuff is still hardcoded.
+Look in `config.example.js`, copy and adjust to taste.
 
-    $ ./http-stream-pump.js
+Create as many streams as you like in config.js.  The only two types
+you choose right now are `mmsh_push` and `mmsh_pull`.  The stream
+becomes available at the HTTP path `/streams/$pathname`, at the path
+name you provided.
 
-It listens on port 8086.  A Microsoft MMSH compatible endpoint is
-available at /video.  Push a video stream to it with Microsoft
+The "push" type makes a push endpoint available at
+`/streams/$pathname_push`.  Push a video stream to it with Microsoft
 Expression Encoder 4 (the old Windows Media Encoder 9 will probably
-also work).  Point Windows Media Player at the same URI to watch the
-live video stream.  No security of any kind yet.
+also work).
+
+The "pull" type will attempt to connect to an MMSH stream server at
+the place you provide (unfortuantely, you can't give it a URI), and
+attempt to pull a stream from that.
+
+No authentication for pushers or viewers yet, unfortunately.
+
+    $ ./http-stream-pump.js config.js
 
 TODO
 ====
