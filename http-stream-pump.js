@@ -105,15 +105,17 @@ var reqHandler = function(req, response) {
     }
 };
 
-
-
-// var ssl_options = {
-//     key: fs.readFileSync('/home/orospakr/nipcow/self_signed_test/server.key'),
-//     cert: fs.readFileSync('/home/orospakr/nipcow/self_signed_test/server.crt')
-// };
-
 var serverv4 = http.createServer(reqHandler);
-// var serverv4https = https.createServer(ssl_options, reqHandler);
+
+if(config.config.ssl) {
+
+    var ssl_options = {
+        key: fs.readFileSync(config.config.ssl_key),
+        cert: fs.readFileSync(config.config.ssl_cert)
+    };
+    var serverv4https = https.createServer(ssl_options, reqHandler);
+    serverv4https.listen(config.config.ssl_port, "0.0.0.0");
+}
 // var serverv6 = http.createServer(reqHandler);
 
 serverv4.listen(config.config.port, "0.0.0.0");
