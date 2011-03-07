@@ -1,0 +1,24 @@
+exports.config = {
+    port: 8086,
+
+    ssl: true,
+    ssl_port: 8089,
+    ssl_key: "mykey.key",
+    ssl_cert: "mykey.cert",
+
+    streams: [
+	{
+	    name: "Test Pull Video Source",
+	    enabled: true,
+	    type: "mmsh_pull",
+	    source_options: {host:"127.0.0.1", port: "7070", path: "/"},
+	    path: "pulled_video"
+	},
+	{
+	    name: "Test Push Video Source",
+	    enabled: false,
+	    type: "mmsh_push",
+	    path: "pushed_video"
+	}
+    ]
+};
