@@ -26,6 +26,18 @@ describe('utilities', function() {
 	expect(hsp_util.GUID.get(blob, 0)).toEqual(expected);
     });
 
+    it("should test whether an IPv4 address is inside RFC 1918 ('private addresses'), or RFC 3330 (local, or loopback)", function() {
+	expect(hsp_util.isLocalIP("10.0.0.1")).toBeTruthy();
+	expect(hsp_util.isLocalIP("11.0.0.1")).toBeFalsy();
+	expect(hsp_util.isLocalIP("2001:4830:16ca:1:224:21ff:fea7:5e27")).toBeFalsy();
+	expect(hsp_util.isLocalIP("172.16.0.8")).toBeTruthy();
+	expect(hsp_util.isLocalIP("198.72.62.4")).toBeFalsy();
+	expect(hsp_util.isLocalIP("132.213.254.1")).toBeFalsy();
+	expect(hsp_util.isLocalIP("192.168.13.37")).toBeTruthy();
+	expect(hsp_util.isLocalIP("169.254.13.37")).toBeTruthy();
+	expect(hsp_util.isLocalIP("127.0.0.1")).toBeTruthy();
+    });
+
     describe("Pragma request header parser", function() {
 	it("should retrieve values when Pragma field exists", function() {
 	    var req = {

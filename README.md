@@ -104,3 +104,4 @@ This is still very new, and kind of buggy.  My TODO notes follow:
 * Warn and fail if fragmented ASF headers (any packets?) arrive
 * Does the MMSH preheader location id field have a appropriate wrap
   behaviour when it overflows the 32-bits?
+* proper IPv6 support

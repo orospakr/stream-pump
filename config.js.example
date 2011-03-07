@@ -3,6 +3,7 @@ exports.config = {
 
     use_http_proxy: false,
     http_proxy_host: "some_proxy",
+    use_proxy_for_local_addresses: false,
     http_proxy_port: 8080,
 
     ssl: false,
