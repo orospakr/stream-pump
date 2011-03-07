@@ -1,6 +1,10 @@
 exports.config = {
     port: 8086,
 
+    use_http_proxy: false,
+    http_proxy_host: "some_proxy",
+    http_proxy_port: 8080,
+
     ssl: false,
     ssl_port: 8089,
     ssl_key: "mykey.key",

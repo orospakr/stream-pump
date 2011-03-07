@@ -18,10 +18,9 @@ var mmsh_push_source = require('./lib/mmsh-push-source');
 var mmsh_pull_source = require('./lib/mmsh-pull-source');
 var mmsh_handler = require('./lib/mmsh-handler');
 var log = require('./lib/logging');
+var hsp_util = require('./lib/util');
 
 var c = "Main";
-
-// path.resolve
 
 var config_path = process.argv[2];
 if(config_path === undefined) {
@@ -34,6 +33,9 @@ if(!(path.existsSync(config_resolved_path))) {
     process.exit(-1);
 }
 var config = require(config_resolved_path);
+
+// TODO refactor this rather sneaky way to make the config globally available...
+hsp_util.config = config.config;
 
 var handlers = [];
 
