@@ -76,10 +76,12 @@ Expression Encoder 4 (the old Windows Media Encoder 9 will probably
 also work).
 
 The "pull" type will attempt to connect to an MMSH stream server at
-the place you provide (unfortuantely, you can't give it a URI), and
-attempt to pull a stream from that.
+the place you provide (which could in fact be another Stream Pump),
+and attempt to pull a stream from that.
 
 No authentication for pushers or viewers yet, unfortunately.
+
+Run the Pump itself with:
 
     $ ./http-stream-pump.js config.js
 
