@@ -19,12 +19,12 @@ Website
 Synopsis
 ========
 
-Stream Pump is intended as a way to "bounce" or "reflect" a live video
-stream over HTTP from one source to many clients, and do it with
-something a little smaller and lighter than the big, proprietary, (and
-expensive) media server applications (like Windows Media Server).  It
-was originally written to serve a need for serving video to many
-clients behind a bottle-neck.
+Stream Pump is intended as a way to "bounrce", "reflect" or "multiply"
+a live video stream over HTTP from one source to many clients, and do
+it with something a little smaller and lighter than the big,
+proprietary, (and expensive) media server applications (like Windows
+Media Server).  It was originally written to serve a need for serving
+video to many clients behind a bottle-neck.
 
 It does:
 
@@ -49,17 +49,17 @@ Dependencies
   Node
 * `strtok` (https://github.com/pgriess/node-strtok)
 
+Both of those packages are available in NPM under the name given.
+
 NB. Node.js v0.4 doesn't realize that Pragma HTTP headers can be
 joined with commas.  Add `case 'pragma':` to the switch statement in
-`IncomingMessage.prototype._addHeaderLine` in node's lib/http.js.  I
-test to make sure that this issue is fixed in my test cases.
-
-Both jasmine-node and strtok are available in NPM.
+`IncomingMessage.prototype._addHeaderLine` in node's lib/http.js.  The
+spec suite tests make sure that this issue is fixed.
 
 Usage
 =====
 
-Run the test suite first, to ensure sanity:
+Run the test suite first, to increase confidence of sanity:
 
     $ ./specs.js
 
@@ -91,6 +91,7 @@ TODO
 This is still very new, and kind of buggy.  My TODO notes follow:
 
 * add docstrings
+* add authentication
 * handle push stream terminating (either nice EOS or socket close),
   and reattaching
 * dealing with client showing up with unknown id
