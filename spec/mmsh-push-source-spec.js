@@ -46,7 +46,7 @@ describe("MMSH Push Source", function() {
 	    req = {headers:{"content-type":"application/x-wms-pushstart"}};
 	    stream_created = false;
 	    stream = undefined;
-	    mmsh_stream.MMSHStream = function(rq, includes_preheaders, error_handler) {
+	    mmsh_stream.MMSHStream = function(rq, includes_preheaders) {
 		expect(includes_preheaders).toBeFalsy();
 		expect(rq).toBe(req);
 		stream_created = true;
@@ -74,6 +74,29 @@ describe("MMSH Push Source", function() {
 	    });
 
 	    it("should succeed", function() { });
+	});
+
+	it("should shut down and restart a new stream if one is already active if it receives a new push request", function() {
+	});
+
+	it("should inform when the stream fails or closes", function() {
+	    got_head = false;
+	    got_end = false;
+	    got_done = false;
+	    response.writeHead = function(code, heads) {
+		expect(code).toEqual(422);
+		got_head = true;
+	    };
+	    response.end = function(msg) {
+		expect(got_head).toBeTruthy();
+		got_end = true;
+	    };
+	    source.on("done", function() {
+		got_done = true;
+	    });
+	    stream.emit("done");
+	    expect(got_end).toBeTruthy();
+	    expect(got_done).toBeTruthy();
 	});
 
 	afterEach(function() {

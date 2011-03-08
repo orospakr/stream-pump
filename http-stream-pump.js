@@ -88,7 +88,6 @@ var reqHandler = function(req, response) {
     handlers.forEach(function(handler) {
 	var regex_str = "^\\/streams\\/" + handler.path + "(\\/$|$)"
 	if(pathname.match(new RegExp(regex_str, "i"))) {
-	    console.log("HIT");
 	    handler.handler.consumeRequest(req, response);
 	    hit_handler = true;
 	}

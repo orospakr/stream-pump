@@ -67,5 +67,12 @@ describe("MMSH Packet", function() {
 	    var result = d.repackWithPreheader(1);
 	    expect(result).toMatchBuffer(expected);
 	});
+
+	it("should pack an end of stream packet", function() {
+	    var d = new mmsh_packet.EndOfStreamPacket(function() {}, function() {});
+	    var expected = new Buffer([0x24, 0x45, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00]);
+	    var result = d.repack();
+	    expect(result).toMatchBuffer(expected);
+	});
     });
 });

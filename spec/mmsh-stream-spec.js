@@ -20,8 +20,6 @@ describe('MMSH Handler', function() {
 	};
 
 	handler_func = {};
-	
-	
     });
 
     describe("with MMSH preheaders enabled", function() {
@@ -40,12 +38,14 @@ describe('MMSH Handler', function() {
     describe("without MMSH preheaders enabled", function() {
 	beforeEach(function() {
 	    var orig_dmux = mmsh_demuxer.MMSHDemuxer;
-	    mmsh_demuxer.MMSHDemuxer = function(strm, includes_preheaders, handler_func_) {
+	    dmux_error_handler_func = undefined;
+	    mmsh_demuxer.MMSHDemuxer = function(strm, includes_preheaders, handler_func_, error_handler_func_) {
 		expect(includes_preheaders).toBeFalsy();
+		dmux_error_handler_func = error_handler_func_;
 		expect(strm).toBe(req_stream);
 		handler_func = handler_func_;
 	    };
-	    stream = new mmsh_stream.MMSHStream(req_stream, false, function() {});
+	    stream = new mmsh_stream.MMSHStream(req_stream, false, function() {}, function() {error_handler_func(); });
 	    mmsh_demuxer.MMSHDemuxer = orig_dmux;
 	});
 
@@ -131,6 +131,37 @@ describe('MMSH Handler', function() {
 	    handler_func(test_packet);
 	    handler_func(test_packet1);
 	    expect(got_handlers).toEqual(2);
+	});
+
+	it("should emit done when it gets EoS", function() {
+	    var end_packet = {name:"End of Stream"};
+	    var got_done = false;
+	    stream.on("done", function() {
+		got_done = true;
+	    });
+	    handler_func(end_packet);
+	    expect(got_done).toBeTruthy();
+	});
+
+	it("should emit done when MMSHDemuxer fails or stops", function() {
+	    var got_done = false;
+	    stream.on("done", function() {
+		got_done = true;
+	    });
+	    dmux_error_handler_func();
+	    expect(got_done).toBeTruthy();
+	});
+
+	it("shouldn't emit done twice when it gets both EoS and demuxer done", function() {
+	    var end_packet = {name:"End of Stream"};
+	    var got_dones = 0;
+	    stream.on("done", function() {
+		got_dones += 1;
+	    });
+	    handler_func(end_packet);
+	    dmux_error_handler_func();
+	    expect(got_dones).toEqual(1);
+	    
 	});
 
     });
