@@ -67,7 +67,15 @@ describe("MMSH Handler", function() {
 		});
 
 		it("should create a new session for a client with no ID", function() {
+		    var orig_mcs = mmsh_client_session.MMSHClientSession;
 		    
+		    req = {headers: {"Pragma":"client-id=1338"}};
+		    response = {};
+		    
+		    mmsh_client_session.MMSHClientSession = function(strm, client_id_checker) {
+
+			
+		    };
 		});
 
 		it("should delegate a client request with a client ID to its existing session", function() {
@@ -87,6 +95,10 @@ describe("MMSH Handler", function() {
 		    expect(got_request).toBeTruthy();
 		    
 		    mmsh_client_session.MMSHClientSession = orig_mcs;
+		});
+
+		it("should create a new session anyway for a request with a non-existent client ID", function() {
+		    
 		});
 		
 		describe("and stream finishes", function() {
