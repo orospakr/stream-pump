@@ -82,7 +82,8 @@ if(handlers.length === 0) {
 var reqHandler = function(req, response) {
     var pathname = url.parse(req.url).pathname;
 
-    log.debug(c, req.method + " " + pathname + " (from: " + req.socket.remoteAddress + "): " + util.inspect(req.headers));
+    log.debug(c, req.method + " " + pathname + " (from: " + req.socket.remoteAddress + ")");
+    // + util.inspect(req.headers));
 
     var hit_handler = false;
     handlers.forEach(function(handler) {
