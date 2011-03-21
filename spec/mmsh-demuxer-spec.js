@@ -28,7 +28,7 @@ describe('MMSH Demuxer', function() {
 		expect(packet.name).toEqual("Data");
 		received = 1;
 	    } else if(received === 1) {
-		expect(packet.payload).not.toBeDefined();
+		expect(packet.payload.length).toEqual(0);
 		expect(packet.name).toEqual("End of Stream");
 		received = 2;
 	    }

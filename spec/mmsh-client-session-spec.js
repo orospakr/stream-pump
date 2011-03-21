@@ -6,6 +6,8 @@
 var mmsh_client_session = require("../lib/mmsh-client-session");
 var spec_helper = require('./spec_helper');
 var hsp_util = require("../lib/util");
+var mmsh_packet = require("../lib/mmsh-packet");
+
 var events = require('events');
 var util = require('util');
 
@@ -68,15 +70,9 @@ describe("An MMSH Client Session", function() {
 			    close_cb = cb;
 			}}
 		    };
-		    var stream_data_cb = undefined;
-		    // stream.on("data",function(kind, cb) {
-		    // 	expect(kind).toEqual("Data");
-		    // 	stream_data_cb = cb;
-		    // 	return 42;
-		    // };
 		    var step = 0; // 0: nowhere, 1: got HTTP headers, 2: got ASF header, 3: got data packet
 		    var header_packet = {};
-		    var response = {
+		    response = {
 			writeHead: function(code, headers) {
 			    expect(headers["Content-Length"]).toBeUndefined();
 			    expect(headers["Content-Type"]).toEqual("application/x-mms-framed");
@@ -106,6 +102,24 @@ describe("An MMSH Client Session", function() {
 
 		    // check that listener on EventEmitter has been removed
 		    expect(stream._events["Data"]).toBeUndefined();
+		});
+
+		it("should boot the client with EOS when Stream finishes", function() {
+		    var orig_eos = mmsh_packet.EndOfStreamPacket;
+		    mmsh_packet.EndOfStreamPacket = function() {
+			this.repackWithPreheader = function() {return "eos packet";};
+		    };
+		    got_end = false;
+		    response.end = function(data) {
+			expect(data).toEqual("eos packet");
+			got_end = true;
+		    };
+		    stream.emit("done");
+		    expect(got_end).toBeTruthy();
+
+		    expect(stream._events["Data"]).toBeUndefined();
+
+		    mmsh_packet.EndOfStreamPacket = orig_eos;
 		});
 	    });
 	});
