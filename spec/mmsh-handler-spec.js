@@ -5,6 +5,7 @@
 
 var events = require("events");
 var mmsh_handler = require("../lib/mmsh-handler");
+var hsp_util = require("../lib/util");
 var mmsh_client_session = require("../lib/mmsh-client-session");
 
 describe("MMSH Handler", function() {
@@ -67,15 +68,6 @@ describe("MMSH Handler", function() {
 		});
 
 		it("should create a new session for a client with no ID", function() {
-		    var orig_mcs = mmsh_client_session.MMSHClientSession;
-		    
-		    req = {headers: {"Pragma":"client-id=1338"}};
-		    response = {};
-		    
-		    mmsh_client_session.MMSHClientSession = function(strm, client_id_checker) {
-
-			
-		    };
 		});
 
 		it("should delegate a client request with a client ID to its existing session", function() {
@@ -98,7 +90,29 @@ describe("MMSH Handler", function() {
 		});
 
 		it("should create a new session anyway for a request with a non-existent client ID", function() {
+		    var orig_mcs = mmsh_client_session.MMSHClientSession;
+		    var new_sess = undefined;
+		    var new_sess_got_req = false;
+
+		    req = {headers: {"Pragma":"client-id=1338"}, socket: {remoteAddress: ""}};
+		    response = {};
 		    
+		    mmsh_client_session.MMSHClientSession = function(strm, client_id_checker) {
+			expect(client_id_checker(1339)).toBeTruthy();
+			this.client_id = 1339;
+			expect(strm).toBe(stream);
+			new_sess = this;
+			this.consumeRequest = function(req, response) {
+			    expect(req).toBe(req);
+			    expect(response).toBe(response);
+			    new_sess_got_req = true;
+			};
+		    };
+
+		    handler.consumeRequest(req, response);
+		    expect(new_sess_got_req).toBeTruthy();
+
+		    mmsh_client_session.MMSHClientSession = orig_mcs;
 		});
 		
 		describe("and stream finishes", function() {
