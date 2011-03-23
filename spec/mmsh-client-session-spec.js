@@ -102,6 +102,7 @@ describe("An MMSH Client Session", function() {
 
 		    // check that listener on EventEmitter has been removed
 		    expect(stream._events["Data"]).toBeUndefined();
+		    expect(stream._events["done"]).toBeUndefined();
 		});
 
 		it("should boot the client with EOS when Stream finishes", function() {
