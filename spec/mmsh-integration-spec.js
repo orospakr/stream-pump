@@ -5,6 +5,24 @@
 
 var mmsh_stream = require('../lib/mmsh-stream.js');
 
+
+// MMSH integration should start, receive a client
+
+describe("MMSH integration should", function() {
+    describe("start, ", function() {
+	beforeEach(function() {
+	});
+
+	it("successfully", function() {
+	    
+	});
+
+	describe("begin receiving a stream, ", function() {
+
+	});
+    });
+});
+
 //module.exports = testCase({
     // setUp: function(cb) {
     // 	this.stream = new mmsh_stream.MMSHStream();
