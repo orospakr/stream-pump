@@ -3,22 +3,87 @@
 // Written by Andrew Clunis <aclunis@credil.org>
 // See COPYING for license terms.
 
-var mmsh_stream = require('../lib/mmsh-stream.js');
+var mmsh_stream = require('../lib/mmsh-stream');
+var server = require('../lib/server');
 
+var spec_helper = require('./spec_helper.js');
 
-// MMSH integration should start, receive a client
+describe("MMSH integration", function() {
+    describe("push stream", function() {
+	describe("should start, ", function() {
+	    beforeEach(function() {
+		streams = [{
+		    name: "Test Stream",
+		    enabled: true,
+		    type: "mmsh_push",
+		    source_options: {host: "example.com", port: "8080", part: "/"},
+		    path: "test",
+		}];
+		pump = new server.Server(streams);
 
-describe("MMSH integration should", function() {
-    describe("start, ", function() {
-	beforeEach(function() {
-	});
+		push_req = new spec_helper.MockStream();
+		push_req.url = "http://example.com:8080/streams/test_push";
+		push_req.headers = {"content-type": "application/x-wms-pushstart"};
+		push_req.socket = {"remoteAddress": ""};
 
-	it("successfully", function() {
-	    
-	});
+		push_response = {
+		    writeHead: function(code, heads) {
+			expect().toNotGetHere();
+		    },
+		    end: function() {
+			expect().toNotGetHere();
+		    }
+		};
+		pump.consumeRequest(push_req, push_response);
+	    });
 
-	describe("begin receiving a stream, ", function() {
+	    it("successfully", function() {
+		
+	    });
 
+	    describe("before a header is received, ", function() {
+		it("should deny clients", function() {
+		    var req = {
+			url: "http://example.com:8080/streams/test",
+			socket: {"remoteAddress": ""},
+		    };
+		    var got_end = false;
+		    var got_head = false;
+		    var response = {
+			writeHead: function(code, headers) {
+			    expect(code).toEqual(503);
+			    got_head = true;
+			},
+			end: function() {
+			    expect(got_head).toBeTruthy();
+			    got_end = true;
+			}
+		    };
+		    pump.consumeRequest(req, response);
+		    expect(got_end).toBeTruthy();
+		});
+		
+	    });
+
+	    describe("begin receiving a stream, ", function() {
+		beforeEach(function() {
+		    header = new Buffer([0x24, 0x44, 0x05, 0x00, 0x00, 0x01, 0x02, 0x03, 0x04]);
+		    push_req.injectData(header);
+		});
+
+		it("successfully", function() {
+		});
+
+		describe("a client arrives, ", function() {
+		    it("should send the client the current header, ", function() {
+
+		    });
+		});
+	    });
+
+	    afterEach(function() {
+		
+	    });
 	});
     });
 });
