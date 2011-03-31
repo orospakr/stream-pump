@@ -6,6 +6,8 @@ exports.config = {
     use_proxy_for_local_addresses: false,
     http_proxy_port: 8080,
 
+    redirect_404_to: "https://somesite.org",
+
     ssl: false,
     ssl_port: 8089,
     ssl_key: "mykey.key",
