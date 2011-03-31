@@ -19,7 +19,7 @@ describe("MMSH integration", function() {
 		    source_options: {host: "example.com", port: "8080", part: "/"},
 		    path: "test",
 		}];
-		pump = new server.Server(streams);
+		pump = new server.Server({}, streams);
 
 		push_req = new spec_helper.MockStream();
 		push_req.url = "http://example.com:8080/streams/test_push";

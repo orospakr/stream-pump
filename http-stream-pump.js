@@ -42,7 +42,7 @@ var handlers = [];
 
 console.log("Starting up HTTP Stream Pump!");
 
-var pump_server = new server.Server(config.config.streams);
+var pump_server = new server.Server(config.config, config.config.streams);
 
 var submitRequest = function(req, response) {
     pump_server.consumeRequest(req, response); 
