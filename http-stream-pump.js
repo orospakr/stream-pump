@@ -19,6 +19,7 @@ var mmsh_pull_source = require('./lib/mmsh-pull-source');
 var mmsh_handler = require('./lib/mmsh-handler');
 var log = require('./lib/logging');
 var hsp_util = require('./lib/util');
+var server = require('./lib/server');
 
 var c = "Main";
 
@@ -41,78 +42,19 @@ var handlers = [];
 
 console.log("Starting up HTTP Stream Pump!");
 
-config.config.streams.forEach(function(strm) {
-    if(!(strm.enabled)) {
-	return;
-    }
-    log.info(c, "Setting up stream: " + strm.name);
-    var failure = function(reason) {
-	log.error(c, "... unable to start stream (" + strm.name + "), because: " + reason);
-    };
+var pump_server = new server.Server(config.config.streams);
 
-    if (!(strm.path.match(/^[a-zA-Z0-9_]*$/))) {
-	failure("Specified stream path contains inappropriate characters: " + strm.path);
-	return;
-    }
-
-    r = {};
-    if(strm.type === "mmsh_pull") {
-	r.path = strm.path;
-	r.source = new mmsh_pull_source.MMSHPullSource(strm.source_options);
-	r.handler = new mmsh_handler.MMSHHandler(r.source);
-	handlers.push(r);
-    } else if(strm.type === "mmsh_push") {
-	r.path = strm.path;
-	r.source = new mmsh_push_source.MMSHPushSource();
-	r.handler = new mmsh_handler.MMSHHandler(r.source);
-	handlers.push(r);
-	// add an extra handler for the push source
-	handlers.push({path: strm.path + "_push", handler: r.source});
-    } else {
-	log.error(c, "Unknown source type: " + strm.type);
-	return;
-    }
-    log.info(c, "... stream ready!");
-});
-
-if(handlers.length === 0) {
-    log.warn(c, "No streams have been configured.  Idle...");
-}
-
-var reqHandler = function(req, response) {
-    var pathname = url.parse(req.url).pathname;
-
-    log.debug(c, req.method + " " + pathname + " (from: " + req.socket.remoteAddress + ")");
-    // + util.inspect(req.headers));
-
-    var hit_handler = false;
-    handlers.forEach(function(handler) {
-	var regex_str = "^\\/streams\\/" + handler.path + "(\\/$|$)"
-	if(pathname.match(new RegExp(regex_str, "i"))) {
-	    handler.handler.consumeRequest(req, response);
-	    hit_handler = true;
-	}
-    });
-
-    if(!hit_handler) {
-	response.writeHead(404, {"Content-Type": "text/html"});
-
-	response.end("Sorry, nothing here!");
-	log.warn(c, "404'd: Attempt to fetch " + pathname);
-	
-	return;
-    }
+var submitRequest = function(req, response) {
+    pump_server.consumeRequest(req, response); 
 };
-
-var serverv4 = http.createServer(reqHandler);
+var serverv4 = http.createServer(submitRequest);
 
 if(config.config.ssl) {
-
     var ssl_options = {
         key: fs.readFileSync(config.config.ssl_key),
         cert: fs.readFileSync(config.config.ssl_cert)
     };
-    var serverv4https = https.createServer(ssl_options, reqHandler);
+    var serverv4https = https.createServer(ssl_options, submitRequest);
     serverv4https.listen(config.config.ssl_port, "0.0.0.0");
 }
 // var serverv6 = http.createServer(reqHandler);
