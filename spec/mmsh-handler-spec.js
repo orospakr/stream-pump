@@ -4,6 +4,7 @@
 // See COPYING for license terms.
 
 var events = require("events");
+var sys = require('sys');
 var mmsh_handler = require("../lib/mmsh-handler");
 var hsp_util = require("../lib/util");
 var mmsh_client_session = require("../lib/mmsh-client-session");
@@ -50,6 +51,7 @@ describe("MMSH Handler", function() {
 		    req = {headers: {}, socket: {remoteAddress: ""}};
 		    response = {};
 		    mmsh_client_session.MMSHClientSession = function(strm, client_id_checker) {
+			events.EventEmitter.call(this);
 			expect(client_id_checker(1337)).toBeTruthy();
 			this.client_id = 1337;
 			expect(strm).toBe(stream);
@@ -60,11 +62,33 @@ describe("MMSH Handler", function() {
 			    sess_got_request = true;
 			};
 		    };
+		    sys.inherits(mmsh_client_session.MMSHClientSession, events.EventEmitter);
 
 		    handler.consumeRequest(req, response);
 		    expect(sess_got_request).toBeTruthy();
 
 		    mmsh_client_session.MMSHClientSession = orig_mcs;
+		});
+
+		it("Should increment/decrement active sessions count as a session starts and stops streaming", function() {
+		    expect(handler.active_client_streams).toEqual(0);
+		    var got_changed = 0;
+		    handler.on("active-clients-changed", function(count) {
+			if(got_changed === 0) {
+			    expect(count).toEqual(1)
+			    got_changed = 1;
+			} else if(got_changed === 1) {
+			    expect(count).toEqual(0);
+			    got_changed = 2;
+			} else {
+			    expect().toNotGetHere();
+			}
+		    });
+		    sess.emit("streaming");
+		    expect(handler.active_client_streams).toEqual(1);
+		    sess.emit("stopped");
+		    expect(handler.active_client_streams).toEqual(0);
+		    expect(got_changed).toEqual(2);
 		});
 
 		it("should create a new session for a client with no ID", function() {
@@ -107,6 +131,7 @@ describe("MMSH Handler", function() {
 			    expect(response).toBe(response);
 			    new_sess_got_req = true;
 			};
+			this.on = function() {};
 		    };
 
 		    handler.consumeRequest(req, response);
