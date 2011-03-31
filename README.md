@@ -20,12 +20,12 @@ Website
 Synopsis
 ========
 
-Stream Pump is intended as a way to "bounrce", "reflect" or "multiply"
-a live video stream over HTTP from one source to many clients, and do
-it with something a little smaller and lighter than the big,
-proprietary, (and expensive) media server applications (like Windows
-Media Server).  It was originally written to serve a need for serving
-video to many clients behind a bottle-neck.
+Stream Pump is intended as a way to "multiply" a live video stream
+over HTTP from one source to many clients, and do it with something a
+little smaller and lighter than the big, proprietary, (and expensive)
+media server applications (like Windows Media Server).  It was
+originally written to serve a need for serving video to many clients
+behind a bottle-neck.
 
 It does:
 
@@ -94,13 +94,12 @@ This is still very new, and kind of buggy.  My TODO notes follow:
 
 * add docstrings
 * add authentication
-* handle push stream terminating (either nice EOS or socket close),
-  and reattaching
-* dealing with client showing up with unknown id
+* handle source stream terminating (either nice EOS or socket close),
+  and reattaching/reconnecting
 * do the integration tests
-* handle VLC clients
+* handle VLC and GStreamer clients
 * make appropriate behavoural descisions for the different user agents
-  as per the MMSH spec, such as it is.
+  as per the MMSH spec, such as it is
 * Warn and fail if fragmented ASF headers (any packets?) arrive
 * Does the MMSH preheader location id field have a appropriate wrap
   behaviour when it overflows the 32-bits?
