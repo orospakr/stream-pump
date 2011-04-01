@@ -5,10 +5,10 @@ var util = require('util');
 // "stream2.webdiffusion-webcasting.org"
 
 var options = {host: "localhost",
-	       port: "8086",
-	       path: "/streams/pushed_video"};
+	       port: "8085",
+	       path: "/streams/test"};
 
-var users = 1000;
+var users = 100;
 
 http.getAgent(options.host, options.port).maxSockets = 10000;
 
@@ -31,6 +31,8 @@ var startFetcher = function(me) {
 };
 
 for(i = 0; i < users; i++) {
-    startFetcher(i);
+    setTimeout(function() {
+	startFetcher(i);	
+    }, 250 * i);
 }
 console.log("All stream pullers running!");
