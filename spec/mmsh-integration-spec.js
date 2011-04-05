@@ -3,12 +3,23 @@
 // Written by Andrew Clunis <aclunis@credil.org>
 // See COPYING for license terms.
 
+var events = require('events');
+
 var mmsh_stream = require('../lib/mmsh-stream');
 var server = require('../lib/server');
 
 var spec_helper = require('./spec_helper.js');
 
 describe("MMSH integration", function() {
+    beforeEach(function() {
+	spec_helper.configureSpec.bind(this)();
+    });
+
+    describe("before push", function() {
+	it("should deny clients", function() {
+	    // TODO
+	});
+    });
     describe("push stream", function() {
 	describe("should start, ", function() {
 	    beforeEach(function() {
@@ -22,6 +33,7 @@ describe("MMSH integration", function() {
 		pump = new server.Server({}, streams);
 
 		push_req = new spec_helper.MockStream();
+		push_req.method = "POST";
 		push_req.url = "http://example.com:8080/streams/test_push";
 		push_req.headers = {"content-type": "application/x-wms-pushstart"};
 		push_req.socket = {"remoteAddress": ""};
@@ -67,7 +79,8 @@ describe("MMSH integration", function() {
 
 	    describe("begin receiving a stream, ", function() {
 		beforeEach(function() {
-		    header = new Buffer([0x24, 0x44, 0x05, 0x00, 0x00, 0x01, 0x02, 0x03, 0x04]);
+		    header = new Buffer([0x24, 0x48, 0x05, 0x00, 0x00, 0x01, 0x02, 0x03, 0x04]);
+		    expected_header_with_preheader = new Buffer([0x24, 0x48, 0x0d, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0c, 0x0d, 0x00, 0x00, 0x01, 0x02, 0x03, 0x04]);
 		    push_req.injectData(header);
 		});
 
@@ -75,14 +88,67 @@ describe("MMSH integration", function() {
 		});
 
 		describe("a client arrives, ", function() {
-		    it("should send the client the current header, ", function() {
+		    it("should send a client the header", function() {
+			var req_socket = new events.EventEmitter();
+			req_socket.remoteAddress = "";
+			req = {
+			    url: "/streams/test",
+			    socket: req_socket,
+			    method: "GET",
+			    headers: {},
+			};
+			got_head = false;
+			got_end = false;
+			response = {
+			    writeHead: function(code, heads) {
+				expect(code).toEqual(200);
+				got_head = true;
+			    },
+			    end: function(data) {
+				expect(got_head).toBeTruthy();
+				expect(data).toMatchBuffer(expected_header_with_preheader);
+				got_end = true;
+			    },
+			};
+			
+			pump.consumeRequest(req, response);
+			expect(got_end).toBeTruthy();
+		    });
+		    
+		    describe("asks to start receiving the stream, ", function() {
+			beforeEach(function() {
+			    var req_socket = new events.EventEmitter();
+			    req_socket.remoteAddress = "";
+			    req = {
+				url: "/streams/test",
+				socket: req_socket,
+				method: "GET",
+				headers: {"pragma": "xPlayStrm=1"},
+			    };
+			    got_head = false;
+			    got_write = false;
+			    response = {
+				writeHead: function(code, heads) {
+				    expect(code).toEqual(200);
+				    got_head = true;
+				},
+				write: function(data) {
+				    expect(got_head).toBeTruthy();
+				    expect(data).toMatchBuffer(expected_header_with_preheader);
+				    got_write = true;
+				}
+			    };
+			    pump.consumeRequest(req, response);
+			    expect(got_write).toBeTruthy();
+			});
 
+			it("should send the client the header", function() {});
+
+			it("should be sent a data packet as it arrives", function() {
+			    var data_packet = new Buffer([0x24, 0x48, 0x05, 0x00, 0x00, 0x01, 0x02, 0x03, 0x04]);
+			});
 		    });
 		});
-	    });
-
-	    afterEach(function() {
-		
 	    });
 	});
     });
