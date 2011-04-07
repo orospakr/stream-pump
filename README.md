@@ -87,6 +87,54 @@ Run the Pump itself with:
 
     $ ./http-stream-pump.js config.js
 
+Pushing from the Encoder with SSL
+=================================
+
+EE4 (and presumably similar) don't seem to support pushing over HTTPS.
+However, Stream Pump supports SSL perfectly well (look in
+`config.js.example`).
+
+You can solve this problem by using Stunnel 4 as the SSL client.
+
+1. Install a copy of Stunnel 4 (Windows version is available
+http://www.stunnel.org, although you have to look in the Downloads
+directory to see it), and configure it using the example config below.
+
+2. Configure Stream Pump to use SSL (see `config.js.example`).
+
+3. Point your EE4 at it (ie., change the hostname and port part of the
+push URL to point at your Stunnel client instead of directly at the
+pump), and you'll be pushing over SSL in no time.
+
+I found this particularly useful because I had to push from EE4 on a
+rather hostile network with an enforced (thankfully HTTP CONNECT
+capable) proxy to a Pump outside on the Public Internet.
+
+Stunnel 4 example config as follows:
+
+    ; Some performance tunings
+    socket = l:TCP_NODELAY=1
+    socket = r:TCP_NODELAY=1
+
+    debug = 6
+
+    client = yes
+
+    [mmsh]
+    ; listen on port 8080 on 127.0.0.1; this is what you point your EE4 to.
+    accept = localhost:8080
+
+    ; to use an HTTP CONNECT proxy, add these lines:
+    ; protocol = connect
+    ; protocolHost = mypump.org:8089 ; ack! you have to put your target
+    ;                                ; (ie., pump's address) here, *not*
+    ;                                ; your proxy's address.  Silly Stunnel.
+
+    ; coordinates of the SSL service of your Stream Pump:
+    ; ... and, to use an HTTP CONNECT proxy, put your proxy server's
+    ; coordinates here, *not* your pump's address.
+    connect = mypump.org:8089
+
 TODO
 ====
 
