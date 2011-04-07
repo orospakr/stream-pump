@@ -112,7 +112,7 @@ capable) proxy to a Pump outside on the Public Internet.
 
 Stunnel 4 example config as follows:
 
-    ; Some performance tunings
+    ;; Some performance tunings
     socket = l:TCP_NODELAY=1
     socket = r:TCP_NODELAY=1
 
@@ -121,18 +121,18 @@ Stunnel 4 example config as follows:
     client = yes
 
     [mmsh]
-    ; listen on port 8080 on 127.0.0.1; this is what you point your EE4 to.
+    ;; listen on port 8080 on 127.0.0.1; this is what you point your EE4 to.
     accept = localhost:8080
 
-    ; to use an HTTP CONNECT proxy, add these lines:
+    ;; to use an HTTP CONNECT proxy, add these lines:
     ; protocol = connect
-    ; protocolHost = mypump.org:8089 ; ack! you have to put your target
-    ;                                ; (ie., pump's address) here, *not*
-    ;                                ; your proxy's address.  Silly Stunnel.
+    ; protocolHost = mypump.org:8089 
+    ;; but wait! you have to put your target (ie., pump's address) here,
+    ;; *not* your proxy's address.  Silly Stunnel.
 
-    ; coordinates of the SSL service of your Stream Pump:
-    ; ... and, to use an HTTP CONNECT proxy, put your proxy server's
-    ; coordinates here, *not* your pump's address.
+    ;; coordinates of the SSL service of your Stream Pump:
+    ;; and, to use an HTTP CONNECT proxy, put your proxy server's
+    ;; coordinates here, *not* your pump's address.
     connect = mypump.org:8089
 
 TODO
