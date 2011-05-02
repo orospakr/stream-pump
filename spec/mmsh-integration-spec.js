@@ -10,6 +10,18 @@ var server = require('../lib/server');
 
 var spec_helper = require('./spec_helper.js');
 
+/* I'm abusing the rspec/jasmine DSL hilariously here.  There
+   needs to be a DSL geared towards this kind of forked-history
+   graph.
+
+   That is, what I'm trying to do here is represent a test sequence
+   that tells a story of an evolving situation.  This test sequence
+   can be forked in order to test differring scenarios that have the
+   same predicates.
+
+   It sounds like I want Cucumber, although I have never used it...
+*/
+
 describe("MMSH integration", function() {
     beforeEach(function() {
 	spec_helper.configureSpec.bind(this)();
@@ -91,15 +103,15 @@ describe("MMSH integration", function() {
 		    it("should send a client the header", function() {
 			var req_socket = new events.EventEmitter();
 			req_socket.remoteAddress = "";
-			req = {
+			var req = {
 			    url: "/streams/test",
 			    socket: req_socket,
 			    method: "GET",
 			    headers: {},
 			};
-			got_head = false;
-			got_end = false;
-			response = {
+			var got_head = false;
+			var got_end = false;
+			var response = {
 			    writeHead: function(code, heads) {
 				expect(code).toEqual(200);
 				got_head = true;
@@ -142,10 +154,27 @@ describe("MMSH integration", function() {
 			    expect(got_write).toBeTruthy();
 			});
 
-			it("should send the client the header", function() {});
+			describe("sends a data packet to the client as the packet arrives, ", function() {
+			    beforeEach(function() {
+				var data_packet = new Buffer([0x24, 0x44, 0x05, 0x00, 0x00, 0x01, 0x02, 0x03, 0x04]);
+				var expected_data_with_preheader = new Buffer([0x24, 0x44, 0x0d, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0d, 0x00, 0x00, 0x01, 0x02, 0x03, 0x04]);
+				var got_write = false;
+				response.write = function(data) {
+				    expect(data).toMatchBuffer(expected_data_with_preheader);
+				    got_write = true;
+				};
+				push_req.injectData(data_packet);
+				expect(got_write).toBeTruthy();
+			    });
 
-			it("should be sent a data packet as it arrives", function() {
-			    var data_packet = new Buffer([0x24, 0x48, 0x05, 0x00, 0x00, 0x01, 0x02, 0x03, 0x04]);
+			    it("successfully", function() {});
+
+			    describe("the client disconnects, ", function() {
+			    });
+
+			    describe("the push source disconnects, ", function() {
+				
+			    });
 			});
 		    });
 		});
