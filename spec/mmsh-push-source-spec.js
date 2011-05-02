@@ -43,7 +43,8 @@ describe("MMSH Push Source", function() {
     describe("once a push is started", function() {
 	beforeEach(function() {
 	    orig_mmsh_stream = mmsh_stream.MMSHStream;
-	    req = {headers:{"content-type":"application/x-wms-pushstart"}};
+	    req = new events.EventEmitter();
+	    req.headers = {"content-type":"application/x-wms-pushstart"};
 	    stream_created = false;
 	    stream = undefined;
 	    mmsh_stream.MMSHStream = function(rq, includes_preheaders) {
@@ -82,7 +83,7 @@ describe("MMSH Push Source", function() {
 	it("should inform when the stream fails or closes", function() {
 	    got_head = false;
 	    got_end = false;
-	    got_done = false;
+	    got_done = 0;
 	    response.writeHead = function(code, heads) {
 		expect(code).toEqual(422);
 		got_head = true;
@@ -91,11 +92,22 @@ describe("MMSH Push Source", function() {
 		expect(got_head).toBeTruthy();
 		got_end = true;
 	    };
+	    /* Only want one done message */
 	    source.on("done", function() {
-		got_done = true;
+		got_done += 1;
 	    });
 	    stream.emit("done");
+	    req.emit("close", false);
 	    expect(got_end).toBeTruthy();
+	    expect(got_done).toEqual(1);
+	});
+
+	it("should finish suddenly if the request socket is closed", function() {
+	    var got_done = false;
+	    source.once("done", function() {
+		got_done = true;
+	    });
+	    req.emit("close", false);
 	    expect(got_done).toBeTruthy();
 	});
 

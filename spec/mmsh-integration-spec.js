@@ -173,9 +173,13 @@ describe("MMSH integration", function() {
 			    });
 
 			    describe("the push source disconnects, ", function() {
-				
+				beforeEach(function() {
+//				    push_req.emit("close"
+				});
 			    });
 			});
+
+			
 		    });
 		});
 	    });
