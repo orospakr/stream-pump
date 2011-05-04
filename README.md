@@ -53,10 +53,10 @@ Dependencies
 
 Both of those packages are available in NPM under the name given.
 
-NB. Node.js v0.4 doesn't realize that Pragma HTTP headers can be
-joined with commas.  Add `case 'pragma':` to the switch statement in
-`IncomingMessage.prototype._addHeaderLine` in node's lib/http.js.  The
-spec suite tests make sure that this issue is fixed.
+NB. Older versions of Node.js v0.4 doesn't realize that Pragma HTTP
+headers can be joined with commas.  Add `case 'pragma':` to the switch
+statement in `IncomingMessage.prototype._addHeaderLine` in node's
+lib/http.js.  The spec suite tests make sure that this issue is fixed.
 
 Usage
 =====

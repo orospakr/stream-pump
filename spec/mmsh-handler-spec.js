@@ -50,11 +50,11 @@ describe("MMSH Handler", function() {
 		    var sess_got_request = false;
 		    req = {headers: {}, socket: {remoteAddress: ""}};
 		    response = {};
-		    mmsh_client_session.MMSHClientSession = function(strm, client_id_checker) {
+		    mmsh_client_session.MMSHClientSession = function(getStrm, client_id_checker) {
 			events.EventEmitter.call(this);
 			expect(client_id_checker(1337)).toBeTruthy();
 			this.client_id = 1337;
-			expect(strm).toBe(stream);
+			expect(getStrm()).toBe(stream);
 			sess = this;
 			this.consumeRequest = function(req, response) {
 			    expect(req).toBe(req);
@@ -71,7 +71,7 @@ describe("MMSH Handler", function() {
 		});
 
 		it("Should increment/decrement active sessions count as a session starts and stops streaming", function() {
-		    expect(handler.active_client_streams).toEqual(0);
+		    expect(handler.client_streams.length).toEqual(0);
 		    var got_changed = 0;
 		    handler.on("active-clients-changed", function(count) {
 			if(got_changed === 0) {
@@ -84,10 +84,11 @@ describe("MMSH Handler", function() {
 			    expect().toNotGetHere();
 			}
 		    });
-		    sess.emit("streaming");
-		    expect(handler.active_client_streams).toEqual(1);
-		    sess.emit("stopped");
-		    expect(handler.active_client_streams).toEqual(0);
+		    var client = new events.EventEmitter();
+		    sess.emit("client", client);
+		    expect(handler.client_streams.length).toEqual(1);
+		    client.emit("done");
+		    expect(handler.client_streams.length).toEqual(0);
 		    expect(got_changed).toEqual(2);
 		});
 
@@ -121,10 +122,10 @@ describe("MMSH Handler", function() {
 		    req = {headers: {"Pragma":"client-id=1338"}, socket: {remoteAddress: ""}};
 		    response = {};
 		    
-		    mmsh_client_session.MMSHClientSession = function(strm, client_id_checker) {
+		    mmsh_client_session.MMSHClientSession = function(getStrm, client_id_checker) {
 			expect(client_id_checker(1339)).toBeTruthy();
 			this.client_id = 1339;
-			expect(strm).toBe(stream);
+			expect(getStrm()).toBe(stream);
 			new_sess = this;
 			this.consumeRequest = function(req, response) {
 			    expect(req).toBe(req);

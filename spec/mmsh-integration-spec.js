@@ -173,9 +173,16 @@ describe("MMSH integration", function() {
 			    });
 
 			    describe("the push source disconnects, ", function() {
-				beforeEach(function() {
-//				    push_req.emit("close"
-				});
+				// beforeEach(function() {
+				//     var got_end = false;
+				//     response.end = function() {
+				// 	got_end = true;
+				//     }
+				//     push_req.emit("close", false);
+				//     expect(got_end).toBeTruthy();
+				// });
+
+				// it("should succeed", function() { });
 			    });
 			});
 
