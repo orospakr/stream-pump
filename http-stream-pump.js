@@ -42,12 +42,12 @@ var handlers = [];
 
 console.log("Starting up HTTP Stream Pump!");
 
-var pump_server = new server.Server(config.config, config.config.streams);
+this.pump_server = new server.Server(config.config, config.config.streams);
 
 var submitRequest = function(req, response) {
-    pump_server.consumeRequest(req, response); 
+    this.pump_server.consumeRequest(req, response); 
 };
-var serverv4 = http.createServer(submitRequest);
+var serverv4 = http.createServer(submitRequest.bind(this));
 
 if(config.config.ssl) {
     var ssl_options = {
@@ -62,3 +62,4 @@ if(config.config.ssl) {
 serverv4.listen(config.config.port, "0.0.0.0");
 // serverv4https.listen(8084, "0.0.0.0");
 //serverv6.listen(8086, "::");
+
