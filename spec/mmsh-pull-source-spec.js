@@ -11,7 +11,7 @@ var hsp_util = require('../lib/util');
 var mmsh_stream = require("../lib/mmsh-stream");
 var mmsh_pull_source = require("../lib/mmsh-pull-source");
 
-describe("MMSH Pull Source", function() {
+describe("MMSH Pull Source Attempt", function() {
     describe("when connecting", function() {
 	beforeEach(function() {
 	    params = {
@@ -57,7 +57,7 @@ describe("MMSH Pull Source", function() {
 		return request;
 	    };
 
-	    pull_source = new mmsh_pull_source.MMSHPullSource(params);
+	    pull_source = new mmsh_pull_source.MMSHPullSourceAttempt(params);
 	    expect(got_end).toBeTruthy();
 	});
 
@@ -98,6 +98,15 @@ describe("MMSH Pull Source", function() {
 		});
 
 		it("should inform that the stream is ready", function() {});
+
+		it("should inform when the stream is done/errored", function() {
+		    got_done = 0;
+		    pull_source.on("done", function() {
+			got_done++;
+		    });
+		    stream.emit("done");
+		    expect(got_done).toEqual(1);
+		});
 	    });
 
 	    afterEach(function() {
@@ -105,9 +114,14 @@ describe("MMSH Pull Source", function() {
 	    });
 	});
 
-	describe("and a connect error happens immediately", function() {
+	describe("and a connect error happens immediately, fire done event", function() {
 	    it("successfully stop, and try again", function() {
+		var got_done = 0;
+		pull_source.on("done", function() {
+		    got_done ++;
+		});
 		request.emit("error", "nope, no server for you");
+		expect(got_done).toEqual(1);
 	    });
 	});
 
