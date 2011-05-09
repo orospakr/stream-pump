@@ -1,7 +1,7 @@
-HTTP Stream Pump
+Stream Pump
 ================
 
-HTTP live video stream reflector written in Node.js.  It currently
+HTTP live video stream "muliplier" written in Node.js.  It currently
 only supports Microsoft MMSH video streams.
 
 Copyright 2010-2011 Government of Canada
@@ -20,16 +20,17 @@ Website
 Synopsis
 ========
 
-Stream Pump is intended as a way to "multiply" a live video stream
-over HTTP from one source to many clients, and do it with something a
-little smaller and lighter than the big, proprietary, (and expensive)
-media server applications (like Windows Media Server).  It was
-originally written to serve a need for serving video to many clients
-behind a bottle-neck.
+Stream Pump is intended as a way to "multiply" or "reflect" a live
+video stream from one source to many clients, and do it with something
+rather smaller and lighter than the big and proprietary (and
+expensive) media server applications (like Windows Media Server).  It
+was originally written to serve a need for serving video to many
+clients behind a bottle-neck.  Currently, the only protocol type
+supported is Microsoft's MMSH.
 
 It does:
 
-* bounce a live HTTP video stream from one source to many clients
+* bounce a live video stream from one source to many clients
   (currently only MMSH supported)
 * simple setup
 * nest within itself; that is, you can daisy-chain Stream Pumps
@@ -74,8 +75,10 @@ name you provided.
 
 The "push" type makes a push endpoint available at
 `/streams/$pathname_push`.  Push a video stream to it with Microsoft
-Expression Encoder 4 (the old Windows Media Encoder 9 will probably
-also work).
+Expression Encoder 4, or another product that integrates the Microsoft
+media stack (the old Windows Media Encoder 9 doesn't appear
+to work, and it sucks anyway).  I've tried pushing to it from a NewTek
+TriCaster, which worked great.
 
 The "pull" type will attempt to connect to an MMSH stream server at
 the place you provide (which could in fact be another Stream Pump),
@@ -86,6 +89,18 @@ No authentication for pushers or viewers yet, unfortunately.
 Run the Pump itself with:
 
     $ ./http-stream-pump.js config.js
+
+Start your pusher, or wait for your pull source(s) to come up, and
+point your MMSH-capable user agent (aka player) the appropriate URI,
+which will look something like this:
+
+    mms://mypump.local/streams/pushed_video
+
+Note the `mms` URI scheme.  This actually asks the user agent to try
+both the old MMS protocol and MMSH, but that URI scheme has the
+greatest compatibility with the user agents I've tried (Windows Media
+Player, VLC, Gstreamer, mplayer).  Specifying http:// or mmsh:// can
+also work depending on your user agent, but why bother?
 
 Pushing from the Encoder with SSL
 =================================
@@ -108,7 +123,8 @@ pump), and you'll be pushing over SSL in no time.
 
 I found this particularly useful because I had to push from EE4 on a
 rather hostile network with an enforced (thankfully HTTP CONNECT
-capable) proxy to a Pump outside on the Public Internet.
+capable) proxy to a Pump outside on the Public Internet (and the 0x46
+bug I mention below was causing mysterious failures).
 
 Stunnel 4 example config as follows:
 
@@ -135,20 +151,29 @@ Stunnel 4 example config as follows:
     ;; coordinates here, *not* your pump's address.
     connect = mypump.org:8089
 
+Further Reading
+===============
+
+[MS-WMSP], from (http://msdn.microsoft.com/en-us/library/cc239311.aspx)
+
 TODO
 ====
 
 This is still very new, and kind of buggy.  My TODO notes follow:
 
-* add docstrings
-* add authentication
-* handle source stream terminating (either nice EOS or socket close),
-  and reattaching/reconnecting
-* do the integration tests
-* handle VLC and GStreamer clients
+* more internal documentation, docstrings, etc.
+* authentication
+* do more integration tests, preferably with factored-out steps
 * make appropriate behavoural descisions for the different user agents
   as per the MMSH spec, such as it is
 * Warn and fail if fragmented ASF headers (any packets?) arrive
 * Does the MMSH preheader location id field have a appropriate wrap
   behaviour when it overflows the 32-bits?
 * proper IPv6 support
+* sometimes, an undocumented MMSH packet type, 0x46, can sometimes
+  appear in the incoming stream from a Microsoft encoder.  I have no
+  idea what to do with it.  It seems to happen far more often if
+  you're pushing through a proxy, which was part of my reason for
+  developing the stunnel procedure you see above.
+* implement some stream protocols other than MMSH.  RTSP and
+  RTMP seem like good candidates.

@@ -60,6 +60,7 @@ if(config.config.ssl) {
 // var serverv6 = http.createServer(reqHandler);
 
 serverv4.listen(config.config.port, "0.0.0.0");
+log.info(c, "HTTP now listening on 0.0.0.0:" + config.config.port);
 // serverv4https.listen(8084, "0.0.0.0");
 //serverv6.listen(8086, "::");
 
