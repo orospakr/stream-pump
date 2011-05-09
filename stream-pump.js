@@ -25,7 +25,7 @@ var c = "Main";
 
 var config_path = process.argv[2];
 if(config_path === undefined) {
-    console.log("usage: http-stream-pump.js <config file> # see config.js.example");
+    console.log("usage: stream-pump.js <config file> # see config.js.example");
     process.exit(-1);
 }
 var config_resolved_path = path.resolve(config_path);
@@ -40,7 +40,7 @@ hsp_util.config = config.config;
 
 var handlers = [];
 
-console.log("Starting up HTTP Stream Pump!");
+console.log("Starting up Stream Pump!");
 
 this.pump_server = new server.Server(config.config, config.config.streams);
 
