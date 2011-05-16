@@ -14,7 +14,7 @@ describe("MMSH Handler", function() {
 	beforeEach(function() {
 	    source = new events.EventEmitter();
 	    
-	    handler = new mmsh_handler.MMSHHandler(source);
+	    handler = new mmsh_handler.MMSHHandler("teststrm", source);
 	});
 
 	it("should reject all new clients", function() {

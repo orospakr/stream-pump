@@ -25,7 +25,7 @@ var c = "Main";
 
 var config_path = process.argv[2];
 if(config_path === undefined) {
-    console.log("usage: http-stream-pump.js <config file> # see config.js.example");
+    console.log("usage: stream-pump.js <config file> # see config.js.example");
     process.exit(-1);
 }
 var config_resolved_path = path.resolve(config_path);
@@ -40,7 +40,7 @@ hsp_util.config = config.config;
 
 var handlers = [];
 
-console.log("Starting up HTTP Stream Pump!");
+console.log("Starting up Stream Pump!");
 
 this.pump_server = new server.Server(config.config, config.config.streams);
 
@@ -60,6 +60,7 @@ if(config.config.ssl) {
 // var serverv6 = http.createServer(reqHandler);
 
 serverv4.listen(config.config.port, "0.0.0.0");
+log.info(c, "HTTP now listening on 0.0.0.0:" + config.config.port);
 // serverv4https.listen(8084, "0.0.0.0");
 //serverv6.listen(8086, "::");
 

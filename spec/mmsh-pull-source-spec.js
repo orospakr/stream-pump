@@ -50,6 +50,12 @@ describe("MMSH Pull Source Attempt", function() {
 		expect(expected_headers.length).toEqual(0);
 		got_end = true;
 	    };
+
+	    timeout_cb = undefined;
+	    http_client.setTimeout = function(duration, cb) {
+		expect(duration).toEqual(15000);
+		timeout_cb = cb;
+	    };
 	    
 	    http_client.request = function(method, path, parms) {
 		expect(method).toEqual('GET');
@@ -59,6 +65,7 @@ describe("MMSH Pull Source Attempt", function() {
 
 	    pull_source = new mmsh_pull_source.MMSHPullSourceAttempt(params);
 	    expect(got_end).toBeTruthy();
+	    expect(timeout_cb).not.toBeUndefined();
 	});
 
 	it("successfully", function() {
@@ -104,8 +111,27 @@ describe("MMSH Pull Source Attempt", function() {
 		    pull_source.on("done", function() {
 			got_done++;
 		    });
+		    var got_end = false;
+		    http_client.end = function() {
+			got_end = true;
+		    };
 		    stream.emit("done");
 		    expect(got_done).toEqual(1);
+		    expect(got_end).toBeTruthy();
+		});
+
+		it("should inform when the socket has received no data for a long period", function() {
+		    got_done = 0;
+		    pull_source.on("done", function() {
+			got_done++;
+		    });
+		    var got_end = false;
+		    http_client.end = function() {
+			got_end = true;
+		    };
+		    timeout_cb();
+		    expect(got_done).toEqual(1);
+		    expect(got_end).toBeTruthy();
 		});
 	    });
 
@@ -120,8 +146,13 @@ describe("MMSH Pull Source Attempt", function() {
 		pull_source.on("done", function() {
 		    got_done ++;
 		});
+		var got_end = false;
+		http_client.end = function() {
+		    got_end = true;
+		};
 		request.emit("error", "nope, no server for you");
 		expect(got_done).toEqual(1);
+		expect(got_end).toBeTruthy();
 	    });
 	});
 
