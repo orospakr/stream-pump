@@ -173,13 +173,13 @@ It will (I'm actively working on this part, so these are my task notes):
 * for now at least, it will be manually specified in the roster which
   pump will pull from which other pump.  if none is specified, it will
   use the original source specified to Pump House
-* receive continuous telemetry from Pumps
 * associate IPv4 networks with a given Pump, and delegate clients
   coming from that network to that Pump (defined in CIDR notation)
 * serve a simple (but attractive!) HTML status page that will show the
   status and throughput of each pump, along with client status
+* receive continuous telemetry from Pumps
 * Pump should verify the X509 certificate of the Pump House before
-  sendings its key
+  sending its key
 * contain integration points for use with an external streaming
   frontend, notably tracking of clients with externally assigned IDs.
   this might not be a comprehensive enough interface for the frontend
