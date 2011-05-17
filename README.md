@@ -175,6 +175,9 @@ It will (I'm actively working on this part, so these are my task notes):
   use the original source specified to Pump House
 * associate IPv4 networks with a given Pump, and delegate clients
   coming from that network to that Pump (defined in CIDR notation)
+* if a client matches multiple pumps, random round-robin select one
+* set priorities on pump entries, so catch-alls for larger regions of
+  network can be created
 * serve a simple (but attractive!) HTML status page that will show the
   status and throughput of each pump, along with client status
 * receive continuous telemetry from Pumps
@@ -232,6 +235,7 @@ This is still very new, and kind of buggy.  My TODO notes follow:
 * does the MMSH preheader location id field have a appropriate wrap
   behaviour when it overflows the 32-bits?
 * proper IPv6 support
+* stats visible over SNMP
 * sometimes, an undocumented MMSH packet type, 0x46, can sometimes
   appear in the incoming stream from a Microsoft encoder.  I have no
   idea what to do with it.  It seems to happen far more often if
