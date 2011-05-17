@@ -1,6 +1,3 @@
-// This is the list of pumps.  It will eventually be replaced with a database to enable more advanced features,
-// but a JSON flat-file works for now.
-
 [
 {
     "id": 0,
@@ -11,6 +8,7 @@
 {
     "id": 1,
     "title": "Gatineau",
+    "parent_id": 0,
     "key":"fnaglewhatsits",
     "networks": ["10.18.32.0/24", "10.19.0.0/16"]
 }

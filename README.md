@@ -28,6 +28,12 @@ was originally written to serve a need for serving video to many
 clients behind a bottle-neck.  Currently, the only protocol type
 supported is Microsoft's MMSH.
 
+On account of multicast being a non-starter these days, and the
+knowledge of protocol state and framing necessary to late-join a
+stream, it remains necessary to use a program like this one all the
+way up at layer 5 or so (depending on how you're counting) to get this
+job done.
+
 It does:
 
 * bounce a live video stream from one source to many clients
@@ -160,22 +166,57 @@ can delegate stream viewers to them automatically.
 It will (I'm actively working on this part, so these are my task notes):
 
 * maintain a roster of Pumps
+* for now, that roster is predfined in a JSON flat-file.  database
+  later.
 * set up Pumps with centrally defined configuration, with a minimum of
   configuration required on the Pump itself
+* for now at least, it will be manually specified in the roster which
+  pump will pull from which other pump.  if none is specified, it will
+  use the original source specified to Pump House
 * receive continuous telemetry from Pumps
 * associate IPv4 networks with a given Pump, and delegate clients
-  coming from that network to that Pump (with CIDR for now)
+  coming from that network to that Pump (defined in CIDR notation)
+* serve a simple (but attractive!) HTML status page that will show the
+  status and throughput of each pump, along with client status
+* Pump should verify the X509 certificate of the Pump House before
+  sendings its key
+* contain integration points for use with an external streaming
+  frontend, notably tracking of clients with externally assigned IDs.
+  this might not be a comprehensive enough interface for the frontend
+  to provide straight-forward presentation to a moderator of the
+  health of a given one of their users.  a bit of a REST API or similar
+  may need to be added eventually
 * automatic provisioning of new Pumps into the roster
+* when this list is further along to completion, replace it with a
+  proper top-down description of the purpose and behaviour of the Pump
+  House component
 * might do automatic discovery of shortest routes between pumps, and
   thus be able to automatically position pumps in the stream pump
   graph... eventally.  by definition kind of heurist-acular
-* contain integration points for use with an external streaming
-  frontend, notably tracking of clients with externally assigned IDs
+* eventually replacing pump keys with X509 client-side certificates
+
+Pump House Configuration
+------------------------
+
+In the pump house config file (see `pump-house-config.json.example`),
+set pumps_roster_json to a JSON file containing the pre-defined roster
+of pumps, as explained below.  Relative paths are considered from the
+path of the config file.  In the `streams` section, enter a stream
+source configuration like you would do in a standard Stream Pump
+configuration.  Typically, pull sources make more sense here.
+
+In the pumps roster JSON (see `pumps-roster.json.example`), pumps are
+specified in an array of hashes with IDs, human-readable titles, an
+authentication key, which other pump in the roster that it should
+source its streams from (if any), and the list of networks that it
+serves, as an array of CIDRs.
 
 Further Reading
 ===============
 
 [MS-WMSP], from http://msdn.microsoft.com/en-us/library/cc239311.aspx
+
+RFC 4632, Section 3.1: http://tools.ietf.org/html/rfc4632#section-3.1
 
 TODO
 ====

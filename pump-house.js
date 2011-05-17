@@ -6,26 +6,60 @@
 
 var fs = require('fs');
 var path = require('path');
+var util = require('util');
 
 var log = require('./lib/logging');
 
-var pumps_roster_path = process.argv[2];
-
 var c = "Pump House";
+
+var parseJSON = function(filename, json_data) {
+    try {
+	var r = JSON.parse(json_data);
+	return r;
+    } catch(err) {
+	log.error(c, "Problem parsing JSON in (" + filename + "), error: " + err.message);
+	process.exit(-1);
+    }
+};
+
+
+var pumphouse_config_path = process.argv[2];
+
+
 
 log.info(c, "Starting Pump House!");
 
-if(pumps_roster_path === undefined) {
-    log.error(c, "usage: pump-house.js <pumps roster json>");
+if(pumphouse_config_path === undefined) {
+    log.error(c, "usage: pump-house.js <pumphouse config json>");
     process.exit(-1);
 }
 
-var resolved_roster_path = path.resolve(pumps_roster_path);
-if(!(path.existsSync(resolved_roster_path))) {
-    log.error(c, "Specified pumps roster (" + resolved_roster_path + ") does not exist.");
+var resolved_config_path = path.resolve(pumphouse_config_path);
+if(!(path.existsSync(resolved_config_path))) {
+    log.error(c, "Specified config (" + resolved_config_path + ") does not exist.");
     process.exit(-1);
 }
 
-var pumps_roster_txt = fs.readFileSync(resolved_roster_path);
 
-var pumps_roster = JSON.parse(pumps_roster_txt);
+
+var config_txt = fs.readFileSync(resolved_config_path);
+
+var config = parseJSON(resolved_config_path, config_txt);
+
+var config_dir = path.dirname(resolved_config_path);
+
+var roster_path;
+if(config.pumps_roster_json[0] === '/') {
+    roster_path = config.pumps_roster_json;
+} else {
+    roster_path = path.resolve(config_dir, config.pumps_roster_json);
+}
+
+if(!(path.existsSync(roster_path))) {
+    log.error(c, "Specified pumps roster (" + roster_path + ") does not exist.");
+    process.exit(-1);
+}
+
+var pumps_roster_txt = fs.readFileSync(roster_path);
+var pumps_roster = parseJSON(roster_path, pumps_roster_txt);
+

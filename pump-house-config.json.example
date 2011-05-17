@@ -1,17 +1,13 @@
 {
-  /* Specify a JSON file here containing the pre-defined roster of pumps. */
-  /* Relative paths are considered from the path of this config file. */
   "pumps_roster_json":"pumps-roster.json.example",
  
-  /* Specify a source here as you would in the standard pump config.js.
-     The topmost pump will use it.  Typically, pull sources make more sense here. */
-  streams: [
+  "streams": [
       {
-	  name: "Test Pull Video Source",
-	  enabled: true,
-	  type: "mmsh_pull",
-	  source_options: {host: "mystream.credil.org", port: "8080", path: "/streams/hello"},
-	  path: "pulled_video"
+	  "name": "Test Pull Video Source",
+	  "enabled": true,
+	  "type": "mmsh_pull",
+	  "source_options": {"host": "mystream.credil.org", "port": "8080", "path": "/streams/hello"},
+	  "path": "pulled_video"
       }
   ]
 }
