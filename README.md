@@ -1,8 +1,8 @@
 Stream Pump
 ================
 
-HTTP live video stream "muliplier" written in Node.js.  It currently
-only supports Microsoft MMSH video streams.
+Live media stream "muliplier" written in Node.js.  It currently only
+supports Microsoft MMSH video streams.
 
 Copyright 2010-2011 Government of Canada
 
@@ -151,10 +151,31 @@ Stunnel 4 example config as follows:
     ;; coordinates here, *not* your pump's address.
     connect = mypump.org:8089
 
+Pump House
+==========
+
+The Pump House is a facility that manages a deployed fleet of Pumps, and
+can delegate stream viewers to them automatically.
+
+It will (I'm actively working on this part, so these are my task notes):
+
+* maintain a roster of Pumps
+* set up Pumps with centrally defined configuration, with a minimum of
+  configuration required on the Pump itself
+* receive continuous telemetry from Pumps
+* associate IPv4 networks with a given Pump, and delegate clients
+  coming from that network to that Pump (with CIDR for now)
+* automatic provisioning of new Pumps into the roster
+* might do automatic discovery of shortest routes between pumps, and
+  thus be able to automatically position pumps in the stream pump
+  graph... eventally.  by definition kind of heurist-acular
+* contain integration points for use with an external streaming
+  frontend, notably tracking of clients with externally assigned IDs
+
 Further Reading
 ===============
 
-[MS-WMSP], from (http://msdn.microsoft.com/en-us/library/cc239311.aspx)
+[MS-WMSP], from http://msdn.microsoft.com/en-us/library/cc239311.aspx
 
 TODO
 ====
@@ -166,8 +187,8 @@ This is still very new, and kind of buggy.  My TODO notes follow:
 * do more integration tests, preferably with factored-out steps
 * make appropriate behavoural descisions for the different user agents
   as per the MMSH spec, such as it is
-* Warn and fail if fragmented ASF headers (any packets?) arrive
-* Does the MMSH preheader location id field have a appropriate wrap
+* warn and fail if fragmented ASF headers (any packets?) arrive
+* does the MMSH preheader location id field have a appropriate wrap
   behaviour when it overflows the 32-bits?
 * proper IPv6 support
 * sometimes, an undocumented MMSH packet type, 0x46, can sometimes
@@ -177,3 +198,4 @@ This is still very new, and kind of buggy.  My TODO notes follow:
   developing the stunnel procedure you see above.
 * implement some stream protocols other than MMSH.  RTSP and
   RTMP seem like good candidates.
+* permission dropping, so it can be started as root but run as nobody
