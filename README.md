@@ -160,14 +160,16 @@ Stunnel 4 example config as follows:
 Pump House
 ==========
 
+NB. None of this is implemented yet!
+
 The Pump House is a facility that manages a deployed fleet of Pumps, and
 can delegate stream viewers to them automatically.
 
 It will (I'm actively working on this part, so these are my task notes):
 
 * maintain a roster of Pumps
-* for now, that roster is predfined in a JSON flat-file.  database
-  later.
+* for now, that roster is predefined in a JSON flat-file.  database
+  later
 * set up Pumps with centrally defined configuration, with a minimum of
   configuration required on the Pump itself
 * for now at least, it will be manually specified in the roster which
@@ -178,17 +180,22 @@ It will (I'm actively working on this part, so these are my task notes):
 * if a client matches multiple pumps, random round-robin select one
 * set priorities on pump entries, so catch-alls for larger regions of
   network can be created
+* make user limits (possibly set as throughput limits and calculated)
+* settable per-pump, and enforced by both the Pump and the Pump House
+  (if a given pump is full, then the round-robin/catch-all logic above
+  should take that into account)
 * serve a simple (but attractive!) HTML status page that will show the
   status and throughput of each pump, along with client status
 * receive continuous telemetry from Pumps
 * Pump should verify the X509 certificate of the Pump House before
   sending its key
 * contain integration points for use with an external streaming
-  frontend, notably tracking of clients with externally assigned IDs.
-  this might not be a comprehensive enough interface for the frontend
-  to provide straight-forward presentation to a moderator of the
-  health of a given one of their users.  a bit of a REST API or similar
-  may need to be added eventually
+  frontend, notably tracking of clients with externally assigned IDs
+  (possibly embedded in the URI of the stream).  this might not be a
+  comprehensive enough interface for the frontend to provide
+  straight-forward presentation to a moderator of the health of a
+  given one of their users.  a bit of a REST API or similar may need
+  to be added eventually
 * automatic provisioning of new Pumps into the roster
 * when this list is further along to completion, replace it with a
   proper top-down description of the purpose and behaviour of the Pump
@@ -198,8 +205,29 @@ It will (I'm actively working on this part, so these are my task notes):
   graph... eventally.  by definition kind of heurist-acular
 * eventually replacing pump keys with X509 client-side certificates
 
+Thus, the Pump<->PumpHouse protocol will have to:
+
+Even if we don't implement all this yet, we want to select a protocol
+paradigm that can be extended in these ways:
+
+* pumps use SSL
+* pumps send their Key to the Pump House with every request
+* pumps ask pump house for their config
+* pumps send pump house status updates, including bandwidth use, etc.
+  possibly quite frequently
+* pumps inform pump house of clients that have successfully connected
+  by ID
+* send pumps realtime instructions, maybe? (kick user, ???).  this
+  would be a nice-to-have
+
+Seems that stock RFC 2616/2617 aka. HTTP works great here, except for that
+last item.
+
 Pump House Configuration
 ------------------------
+
+NB. Again, Pump House is an in-progress feature, so most if this is
+specification as much as anything else.
 
 In the pump house config file (see `pump-house-config.json.example`),
 set pumps_roster_json to a JSON file containing the pre-defined roster
