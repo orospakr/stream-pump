@@ -177,7 +177,8 @@ It will (I'm actively working on this part, so these are my task notes):
   coming from that network to that Pump (defined in CIDR notation)
 * if a client matches multiple pumps, random round-robin select one
 * set priorities on pump entries, so catch-alls for larger regions of
-  network can be created
+  network can be created.  the higher the value, the higher the
+  priority
 * serve a simple (but attractive!) HTML status page that will show the
   status and throughput of each pump, along with client status
 * receive continuous telemetry from Pumps

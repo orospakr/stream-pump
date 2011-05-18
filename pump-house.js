@@ -7,8 +7,10 @@
 var fs = require('fs');
 var path = require('path');
 var util = require('util');
+var http = require('http');
 
 var log = require('./lib/logging');
+var server =require('./lib/pump-house/server.js');
 
 var c = "Pump House";
 
@@ -40,8 +42,6 @@ if(!(path.existsSync(resolved_config_path))) {
     process.exit(-1);
 }
 
-
-
 var config_txt = fs.readFileSync(resolved_config_path);
 
 var config = parseJSON(resolved_config_path, config_txt);
@@ -63,3 +63,14 @@ if(!(path.existsSync(roster_path))) {
 var pumps_roster_txt = fs.readFileSync(roster_path);
 var pumps_roster = parseJSON(roster_path, pumps_roster_txt);
 
+this.pumphouse_server = new server.Server();
+
+var submitRequest = function(req, response) {
+    this.pumphouse_server.consumeRequest(req, response); 
+};
+var serverv4 = http.createServer(submitRequest.bind(this));
+
+var port = config.port || 8081;
+serverv4.listen(port, "0.0.0.0");
+
+log.info(c, "HTTP now listening on 0.0.0.0:" + port);
