@@ -1,6 +1,6 @@
 {
   "pumps_roster_json":"pumps-roster.json.example",
- 
+  "port": 8079,
   "streams": [
       {
 	  "name": "Test Pull Video Source",

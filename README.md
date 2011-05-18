@@ -179,9 +179,10 @@ It will (I'm actively working on this part, so these are my task notes):
   coming from that network to that Pump (defined in CIDR notation)
 * if a client matches multiple pumps, random round-robin select one
 * set priorities on pump entries, so catch-alls for larger regions of
-  network can be created
+  network can be created.  the higher the value, the higher the
+  priority
 * make user limits (possibly set as throughput limits and calculated)
-* settable per-pump, and enforced by both the Pump and the Pump House
+  settable per-pump, and enforced by both the Pump and the Pump House
   (if a given pump is full, then the round-robin/catch-all logic above
   should take that into account)
 * serve a simple (but attractive!) HTML status page that will show the
