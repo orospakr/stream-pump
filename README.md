@@ -1,7 +1,7 @@
 Stream Pump
 ================
 
-Live media stream "muliplier" written in Node.js.  It currently only
+Live media stream "multiplier" written in Node.js.  It currently only
 supports Microsoft MMSH video streams.
 
 Copyright 2010-2011 Government of Canada
