@@ -54,7 +54,7 @@ Dependencies
 ============
 
 * Node.js v0.4
-* `jasmine-node` (http://pivotal.github.com/jasmine/), installed for use with
+* `jasmine-node` (https://jasmine.github.io/), installed for use with
   Node
 * `strtok` (https://github.com/pgriess/node-strtok)
 
