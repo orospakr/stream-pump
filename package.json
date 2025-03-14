@@ -35,15 +35,22 @@
   "jasmine-node": "1.0.0rc1",
   "strtok": "0.1.1"
  },
+ "devDependencies": {
+  "@types/node": "^22.13.10",
+  "ts-node": "^10.9.2",
+  "typescript": "^5.8.2"
+ },
  "scripts": {
-  "test": "specs.js",
-  "start": "node ./stream-pump.js"
+  "test": "jasmine-node spec/",
+  "build": "tsc",
+  "start": "node ./dist/stream-pump.js",
+  "dev": "ts-node ./src/stream-pump.ts"
  },
  "bin": {
-  "stream-pump": "./stream-pump.js"
+  "stream-pump": "./dist/stream-pump.js"
  },
  "directories": {
-  "lib": "lib"
+  "lib": "src/lib"
  },
  "engines": [
   "node"
