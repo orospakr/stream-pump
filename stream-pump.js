@@ -29,7 +29,7 @@ if(config_path === undefined) {
     process.exit(-1);
 }
 var config_resolved_path = path.resolve(config_path);
-if(!(path.existsSync(config_resolved_path))) {
+if(!(fs.existsSync(config_resolved_path))) {
     log.error(c, "Specified config file (" + config_resolved_path + ") does not exist.");
     process.exit(-1);
 }

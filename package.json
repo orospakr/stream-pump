@@ -1,34 +1,52 @@
-{"name": "http-stream-pump",
+{
+ "name": "http-stream-pump",
  "version": "0.0.1",
  "description": "HTTP live video stream reflector written in Node.js (currently only for Microsoft MMSH video streams).",
- "keywords": ["http", "video", "mmsh", "mms", "wmp", "reflector"],
- "maintainers": {"name": "Andrew Clunis",
-		 "email": "aclunis@credil.org",
-		 "web": "http://code.credil.org/projects/stream-pump"},
+ "keywords": [
+  "http",
+  "video",
+  "mmsh",
+  "mms",
+  "wmp",
+  "reflector"
+ ],
+ "maintainers": [
+  {
+   "name": "Andrew Clunis",
+   "email": "aclunis@credil.org",
+   "web": "http://code.credil.org/projects/stream-pump"
+  }
+ ],
  "bugs": {
-     "web": "http://code.credil.org/projects/stream-pump/issues"
+  "web": "http://code.credil.org/projects/stream-pump/issues"
  },
  "licenses": [
-     {
-	 "type": "GPLv3",
-     }
+  {
+   "type": "GPLv3"
+  }
  ],
  "repositories": [
-     {
-	 "type": "git",
-	 "url": "git://github.com/orospakr/http-stream-pump.git",
-     }
+  {
+   "type": "git",
+   "url": "git://github.com/orospakr/http-stream-pump.git"
+  }
  ],
  "dependencies": {
-     "jasmine-node": "1.0.0rc1",
-     "strtok": "0.1.1",
+  "jasmine-node": "1.0.0rc1",
+  "strtok": "0.1.1"
  },
  "scripts": {
-     "test": "specs.js",
-     "run": "http-stream-pump.js"
+  "test": "specs.js",
+  "start": "node ./stream-pump.js"
+ },
+ "bin": {
+  "stream-pump": "./stream-pump.js"
  },
  "directories": {
-     "lib": "lib",
+  "lib": "lib"
  },
- "engines": ["node"],
+ "engines": [
+  "node"
+ ],
+ "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }
